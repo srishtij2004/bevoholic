@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		756ED0482F5B70BB00BE158A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 756ED0472F5B70BB00BE158A /* FirebaseAuth */; };
+		756ED04A2F5B70BB00BE158A /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 756ED0492F5B70BB00BE158A /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		756ED0272F5B6FCE00BE158A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +70,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				756ED0482F5B70BB00BE158A /* FirebaseAuth in Frameworks */,
+				756ED04A2F5B70BB00BE158A /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +132,8 @@
 			);
 			name = Bevoholic;
 			packageProductDependencies = (
+				756ED0472F5B70BB00BE158A /* FirebaseAuth */,
+				756ED0492F5B70BB00BE158A /* FirebaseFirestore */,
 			);
 			productName = Bevoholic;
 			productReference = 756ED0102F5B6FCD00BE158A /* Bevoholic.app */;
@@ -208,6 +217,9 @@
 			);
 			mainGroup = 756ED0072F5B6FCD00BE158A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				756ED0462F5B70BB00BE158A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 756ED0112F5B6FCD00BE158A /* Products */;
 			projectDirPath = "";
@@ -563,6 +575,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		756ED0462F5B70BB00BE158A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		756ED0472F5B70BB00BE158A /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 756ED0462F5B70BB00BE158A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		756ED0492F5B70BB00BE158A /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 756ED0462F5B70BB00BE158A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 756ED0082F5B6FCD00BE158A /* Project object */;
 }
