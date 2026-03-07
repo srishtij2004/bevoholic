@@ -1,2 +1,0 @@
-# bevoholic
-drinking game!!
