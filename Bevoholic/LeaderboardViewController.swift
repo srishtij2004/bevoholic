@@ -12,6 +12,7 @@ class LeaderboardViewController: HeaderViewController, UITableViewDataSource {
     @IBOutlet weak var tableView: UITableView!
 
     var leaderboardPlayers: [Player] = []
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,4 +56,6 @@ class LeaderboardViewController: HeaderViewController, UITableViewDataSource {
         // Return to home screen
         navigationController?.popToRootViewController(animated: true)
     }
+    
+    
 }
