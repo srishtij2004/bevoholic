@@ -10,6 +10,15 @@ import PhotosUI
 
 class DareScreenViewController: HeaderViewController, PHPickerViewControllerDelegate {
 
+    
+    @IBOutlet weak var gameModeLabel: UILabel!
+    @IBOutlet weak var dareModeLabel: UILabel!
+    @IBOutlet weak var usernameLabel: UILabel!
+    @IBOutlet weak var playerPoints: UILabel!
+    
+    @IBOutlet weak var dare: UILabel!
+    @IBOutlet weak var locationButton: UIButton!
+    
     @IBOutlet weak var uploadButton: UIButton!
     @IBOutlet weak var completeButton: UIButton!
     @IBOutlet weak var skipButton: UIButton!
@@ -19,6 +28,7 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         setUploadIconSize()
         addDashedBorder()
         
+        //complete button is disabled at the beginning
         completeButton.isEnabled = false
         completeButton.alpha = 0.5
         completeButton.backgroundColor = .systemGreen
