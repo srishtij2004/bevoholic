@@ -7,7 +7,7 @@
 
 import UIKit
 
-class LeaderboardViewController: UIViewController, UITableViewDataSource {
+class LeaderboardViewController: HeaderViewController, UITableViewDataSource {
 
     @IBOutlet weak var tableView: UITableView!
 
@@ -51,9 +51,7 @@ class LeaderboardViewController: UIViewController, UITableViewDataSource {
     @IBAction func playAgainPressed(_ sender: UIButton) {
 
         // Reset game state
-        DrinkOrDareGameManager.shared.currentPlayerIndex = 0
-        DrinkOrDareGameManager.shared.turnsPlayed = 0
-
+        DrinkOrDareGameManager.shared.resetGame()
         // Return to home screen
         navigationController?.popToRootViewController(animated: true)
     }

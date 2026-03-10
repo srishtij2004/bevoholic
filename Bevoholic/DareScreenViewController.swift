@@ -33,6 +33,21 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         completeButton.alpha = 0.5
         completeButton.backgroundColor = .systemGreen
         completeButton.layer.cornerRadius = 25
+        
+        let manager = DrinkOrDareGameManager.shared
+
+        if let player = manager.currentPlayer() {
+            usernameLabel.text = player.name
+            playerPoints.text = "\(player.points) Points"
+        }
+
+        gameModeLabel.text = manager.gameModeText()
+        dareModeLabel.text = manager.dareModeText()
+        dare.text = manager.currentDare
+
+        if manager.selectedDareMode == .kickback {
+            locationButton.isHidden = true
+        }
     }
     
     func addDashedBorder() {
@@ -107,5 +122,19 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     func enableCompleteButton() {
         completeButton.isEnabled = true
         completeButton.alpha = 1
+    }
+    
+    @IBAction func completePressed(_ sender: UIButton) {
+
+        DrinkOrDareGameManager.shared.completeTurn()
+
+        performSegue(withIdentifier: "showWaiting", sender: self)
+    }
+
+    @IBAction func skipPressed(_ sender: UIButton) {
+
+        DrinkOrDareGameManager.shared.skipTurn()
+
+        performSegue(withIdentifier: "showWaiting", sender: self)
     }
 }

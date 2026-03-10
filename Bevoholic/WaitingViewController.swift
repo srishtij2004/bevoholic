@@ -7,7 +7,7 @@
 
 import UIKit
 
-class WaitingViewController: UIViewController {
+class WaitingViewController: HeaderViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)

@@ -75,6 +75,11 @@ class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableVie
     }
 
     @IBAction func startButtonPressed(_ sender: Any) {
+        // load players into game manager
+            DrinkOrDareGameManager.shared.setPlayers(usernames)
+
+            // go to dare screen
+            performSegue(withIdentifier: "startSegue", sender: self)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
