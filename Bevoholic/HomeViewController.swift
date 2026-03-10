@@ -3,9 +3,12 @@ import Firebase
 import FirebaseAuth
 import FirebaseFirestore
 
-class HomeViewController: UIViewController {
+class HomeViewController: HeaderViewController {
 
     let db = Firestore.firestore()
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
     
     @IBAction func profileTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)

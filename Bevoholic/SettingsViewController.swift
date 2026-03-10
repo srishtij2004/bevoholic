@@ -4,7 +4,7 @@ import FirebaseFirestore
 
 class SettingsViewController: UIViewController {
 
-    @IBOutlet weak var avatarImageView: UIImageView!
+    @IBOutlet weak var avatarImageView: PlayerProfile!
     @IBOutlet weak var usernameTextField: UITextField!
     @IBOutlet weak var statusLabel: UILabel!
 
@@ -25,9 +25,6 @@ class SettingsViewController: UIViewController {
 
     func setupUI() {
         statusLabel.text = ""
-
-        avatarImageView.layer.cornerRadius = avatarImageView.frame.size.width / 2
-        avatarImageView.clipsToBounds = true
 
         styleDifficultyButton(bevoholicButton)
         styleDifficultyButton(buzzedButton)

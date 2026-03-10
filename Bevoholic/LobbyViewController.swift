@@ -8,10 +8,12 @@
 import UIKit
 import FirebaseFirestore
 
-class LobbyViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var tableView: UITableView!
 
+    @IBOutlet weak var gameCodeLabel: UILabel!
+    
     var gameCode: String!
     let db = Firestore.firestore()
     var listener: ListenerRegistration?
@@ -24,9 +26,11 @@ class LobbyViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
         tableView.delegate = self
         tableView.dataSource = self
-
+        gameCodeLabel.text = "Code: \(gameCode ?? "")"
+        tableView.rowHeight = 60
         fetchPlayers()
     }
+
 
     func fetchPlayers() {
         guard let gameCode = gameCode else { return }
@@ -70,25 +74,21 @@ class LobbyViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
     }
 
-
+    @IBAction func startButtonPressed(_ sender: Any) {
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return usernames.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let cell = tableView.dequeueReusableCell(withIdentifier: "PlayerCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "PlayerCell", for: indexPath) as! PlayerCell
 
         let username = usernames[indexPath.row]
 
-        // Configure player icon
-        cell.imageView?.image = UIImage(systemName: "person.circle.fill")
-        cell.imageView?.tintColor = .systemBlue
-        cell.imageView?.layer.cornerRadius = 25
-        cell.imageView?.clipsToBounds = true
-        cell.imageView?.contentMode = .scaleAspectFit
-
-        cell.textLabel?.text = username
+        cell.usernameLabel.text = username
+        cell.avatarImageView.image = UIImage(systemName: "person.circle.fill")
 
         return cell
     }
