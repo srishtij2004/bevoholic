@@ -3,9 +3,12 @@ import Firebase
 import FirebaseAuth
 import FirebaseFirestore
 
-class HomeViewController: UIViewController {
+class HomeViewController: HeaderViewController {
 
     let db = Firestore.firestore()
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
     
     @IBAction func profileTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
@@ -65,6 +68,19 @@ class HomeViewController: UIViewController {
     }
 
     func createGame(location: String) {
+        
+        // Set dare mode in the game manager
+        switch location {
+        case "On Campus":
+            DrinkOrDareGameManager.shared.selectedDareMode = .onCampus
+        case "West Campus":
+            DrinkOrDareGameManager.shared.selectedDareMode = .westCampus
+        case "Kickback":
+            DrinkOrDareGameManager.shared.selectedDareMode = .kickback
+        default:
+            DrinkOrDareGameManager.shared.selectedDareMode = .onCampus
+        }
+        
         guard let userId = Auth.auth().currentUser?.uid else { return }
         let code = generateGameCode()
 
