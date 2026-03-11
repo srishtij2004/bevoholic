@@ -155,4 +155,17 @@ class DrinkOrDareGameManager {
             return "Buzzkill Bevo"
         }
     }
+    
+    func skipButtonText() -> String {
+        switch selectedGameMode {
+        case .buzzedBevo:
+            return "Skip! Take a shot! -5 pts"
+
+        case .bevoHolic:
+            return "Skip! Take 2 shots! -5 pts"
+
+        case .buzzkillBevo:
+            return "Skip! -5 pts"
+        }
+    }
 }

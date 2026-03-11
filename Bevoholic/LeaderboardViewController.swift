@@ -7,7 +7,7 @@
 
 import UIKit
 
-class LeaderboardViewController: HeaderViewController, UITableViewDataSource {
+class LeaderboardViewController: HeaderViewController, UITableViewDataSource, UITableViewDelegate {
 
     @IBOutlet weak var tableView: UITableView!
 
@@ -16,6 +16,7 @@ class LeaderboardViewController: HeaderViewController, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
+        tableView.delegate = self
     }
 
     // Reload leaderboard whenever this screen appears
@@ -33,17 +34,21 @@ class LeaderboardViewController: HeaderViewController, UITableViewDataSource {
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-        let cell = tableView.dequeueReusableCell(withIdentifier: "playerCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: "LeaderboardCell",
+            for: indexPath
+        ) as! LeaderboardCell
 
         let player = leaderboardPlayers[indexPath.row]
 
-        cell.textLabel?.text = player.name
-        cell.detailTextLabel?.text = "\(player.points) pts"
-        
-        // Highlight the winner (first row)
-           if indexPath.row == 0 {
-               cell.textLabel?.font = UIFont.boldSystemFont(ofSize: 18)
-           }
+        cell.usernameLabel.text = player.name
+        cell.scoreLabel.text = "\(player.points) pts"
+        cell.avatarImageView.image = UIImage(systemName: "person.circle.fill")
+
+        // Highlight winner
+        if indexPath.row == 0 {
+            cell.usernameLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        }
 
         return cell
     }

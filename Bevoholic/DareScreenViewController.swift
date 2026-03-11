@@ -7,6 +7,8 @@
 
 import UIKit
 import PhotosUI
+import FirebaseAuth
+import FirebaseFirestore
 
 class DareScreenViewController: HeaderViewController, PHPickerViewControllerDelegate {
 
@@ -25,6 +27,7 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setUploadIconSize()
         addDashedBorder()
         
@@ -36,17 +39,56 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         
         let manager = DrinkOrDareGameManager.shared
 
+        
         if let player = manager.currentPlayer() {
             usernameLabel.text = player.name
-            playerPoints.text = "\(player.points) Points"
+            playerPoints.text = "\(player.points)"
         }
 
-        gameModeLabel.text = manager.gameModeText()
-        dareModeLabel.text = manager.dareModeText()
+        gameModeLabel.text = "  Game Mode: \(manager.gameModeText())"
+        gameModeLabel.layer.cornerRadius = 25
+        dareModeLabel.text = "  Dare Mode: \(manager.dareModeText())"
+        dareModeLabel.layer.cornerRadius = 25
         dare.text = manager.currentDare
-
+        skipButton.setTitle(manager.skipButtonText(), for: .normal)
+        
         if manager.selectedDareMode == .kickback {
             locationButton.isHidden = true
+        }
+        loadUserGameMode()
+    }
+    
+    func loadUserGameMode() {
+
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        let db = Firestore.firestore()
+
+        db.collection("users").document(uid).getDocument { snapshot, error in
+
+            guard let data = snapshot?.data(),
+                  let difficulty = data["difficulty"] as? String else { return }
+
+            let manager = DrinkOrDareGameManager.shared
+
+            switch difficulty {
+            case "Buzzed Bevo":
+                manager.selectedGameMode = .buzzedBevo
+
+            case "Bevoholic":
+                manager.selectedGameMode = .bevoHolic
+
+            case "Buzzkill Bevo":
+                manager.selectedGameMode = .buzzkillBevo
+
+            default:
+                manager.selectedGameMode = .buzzedBevo
+            }
+
+            DispatchQueue.main.async {
+                self.gameModeLabel.text = "  Game Mode: \(manager.gameModeText())"
+                self.skipButton.setTitle(manager.skipButtonText(), for: .normal)
+            }
         }
     }
     

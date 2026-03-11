@@ -33,11 +33,17 @@ class HeaderViewController: UIViewController {
             headerLogo.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
             headerLogo.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             headerLogo.widthAnchor.constraint(equalToConstant: 250),
-            headerLogo.heightAnchor.constraint(equalToConstant: 100)   
+            headerLogo.heightAnchor.constraint(equalToConstant: 100)
         ])
     }
 
     @objc func openSettings() {
-        performSegue(withIdentifier: "showSettings", sender: self)
+
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+
+        if let settingsVC = storyboard.instantiateViewController(withIdentifier: "SettingsViewController") as? SettingsViewController {
+
+            navigationController?.pushViewController(settingsVC, animated: true)
+        }
     }
 }
