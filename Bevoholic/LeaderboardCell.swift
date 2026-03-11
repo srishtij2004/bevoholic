@@ -11,5 +11,4 @@ class LeaderboardCell: UITableViewCell {
     @IBOutlet weak var avatarImageView: PlayerProfile!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var scoreLabel: UILabel!
-
 }
