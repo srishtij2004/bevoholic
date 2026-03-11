@@ -52,22 +52,10 @@ class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableVie
                 let group = DispatchGroup()
 
                 for doc in documents {
-                    let uid = doc.documentID // player UID
-
-                    group.enter()
-
-                    // Fetch username from users collection
-                    self.db.collection("users").document(uid).getDocument { userDoc, error in
-                        defer { group.leave() }
-
-                        if let data = userDoc?.data(), let username = data["username"] as? String {
-                            self.usernames.append(username)
-                        } else {
-                            self.usernames.append("Player") // fallback
-                        }
-                    }
+                    let data = doc.data()
+                    let name = data["name"] as? String ?? "Player"
+                    self.usernames.append(name)
                 }
-
                 group.notify(queue: .main) {
                     self.tableView.reloadData()
                 }
