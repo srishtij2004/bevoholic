@@ -155,4 +155,23 @@ class DrinkOrDareGameManager {
             return "Buzzkill Bevo"
         }
     }
+
+    func randomDare(for location: String) -> String {
+        let previousMode = selectedDareMode
+        selectedDareMode = dareMode(for: location)
+        let selectedDare = nextDare()
+        selectedDareMode = previousMode
+        return selectedDare
+    }
+
+    func dareMode(for location: String) -> DareMode {
+        switch location {
+        case "West Campus":
+            return .westCampus
+        case "Kickback":
+            return .kickback
+        default:
+            return .onCampus
+        }
+    }
 }

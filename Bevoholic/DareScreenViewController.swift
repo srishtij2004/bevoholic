@@ -1,4 +1,4 @@
-
+//
 //  DareScreenViewController.swift
 //  Bevoholic
 //
@@ -7,53 +7,136 @@
 
 import UIKit
 import PhotosUI
+import FirebaseAuth
+import FirebaseFirestore
 
 class DareScreenViewController: HeaderViewController, PHPickerViewControllerDelegate {
 
-    
     @IBOutlet weak var gameModeLabel: UILabel!
     @IBOutlet weak var dareModeLabel: UILabel!
     @IBOutlet weak var usernameLabel: UILabel!
     @IBOutlet weak var playerPoints: UILabel!
-    
+
     @IBOutlet weak var dare: UILabel!
     @IBOutlet weak var locationButton: UIButton!
-    
+
     @IBOutlet weak var uploadButton: UIButton!
     @IBOutlet weak var completeButton: UIButton!
     @IBOutlet weak var skipButton: UIButton!
 
+    var gameCode: String!
+
+    private let db = Firestore.firestore()
+    private var gameListener: ListenerRegistration?
+    private var playerListener: ListenerRegistration?
+    private var hasRoutedAway = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.hidesBackButton = true
         setUploadIconSize()
         addDashedBorder()
-        
-        //complete button is disabled at the beginning
+
         completeButton.isEnabled = false
         completeButton.alpha = 0.5
         completeButton.backgroundColor = .systemGreen
         completeButton.layer.cornerRadius = 25
-        
-        let manager = DrinkOrDareGameManager.shared
+    }
 
-        if let player = manager.currentPlayer() {
-            usernameLabel.text = player.name
-            playerPoints.text = "\(player.points) Points"
-        }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        hasRoutedAway = false
+        observeGame()
+        observeCurrentPlayer()
+    }
 
-        gameModeLabel.text = manager.gameModeText()
-        dareModeLabel.text = manager.dareModeText()
-        dare.text = manager.currentDare
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        gameListener?.remove()
+        gameListener = nil
+        playerListener?.remove()
+        playerListener = nil
+    }
 
-        if manager.selectedDareMode == .kickback {
-            locationButton.isHidden = true
+    func observeGame() {
+        guard let gameCode = gameCode else { return }
+
+        gameListener = db.collection("games").document(gameCode).addSnapshotListener { [weak self] snapshot, error in
+            guard let self = self else { return }
+
+            if let error = error {
+                print("Error observing active turn: \(error.localizedDescription)")
+                return
+            }
+
+            guard let data = snapshot?.data() else { return }
+            self.updateUI(with: data)
+            self.routeIfNeeded(using: data)
         }
     }
-    
+
+    func observeCurrentPlayer() {
+        guard
+            let gameCode = gameCode,
+            let userId = Auth.auth().currentUser?.uid
+        else {
+            return
+        }
+
+        playerListener = db.collection("games")
+            .document(gameCode)
+            .collection("players")
+            .document(userId)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+
+                if let error = error {
+                    print("Error observing player score: \(error.localizedDescription)")
+                    return
+                }
+
+                let points = snapshot?.data()?["points"] as? Int ?? 0
+                self.playerPoints.text = "\(points) Points"
+            }
+    }
+
+    func updateUI(with gameData: [String: Any]) {
+        usernameLabel.text = gameData["currentPlayerName"] as? String ?? "Player"
+        gameModeLabel.text = gameData["gameType"] as? String ?? "Drink or Dare"
+
+        let location = gameData["location"] as? String ?? "On Campus"
+        dareModeLabel.text = location
+        dare.text = gameData["currentDare"] as? String ?? ""
+        locationButton.isHidden = location == "Kickback"
+    }
+
+    func routeIfNeeded(using gameData: [String: Any]) {
+        guard
+            !hasRoutedAway,
+            let currentUserId = Auth.auth().currentUser?.uid,
+            let gameState = gameData["gameState"] as? String
+        else {
+            return
+        }
+
+        if gameState == "finished" {
+            hasRoutedAway = true
+            showLeaderboardScreen()
+            return
+        }
+
+        guard let currentPlayerId = gameData["currentPlayerId"] as? String else { return }
+
+        if currentUserId != currentPlayerId {
+            hasRoutedAway = true
+            showWaitingScreen()
+        }
+    }
+
     func addDashedBorder() {
         let dashedBorder = CAShapeLayer()
         dashedBorder.strokeColor = UIColor.black.cgColor
-        dashedBorder.lineDashPattern = [6,4]
+        dashedBorder.lineDashPattern = [6, 4]
         dashedBorder.fillColor = nil
         dashedBorder.frame = uploadButton.bounds
 
@@ -65,7 +148,6 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         uploadButton.layer.addSublayer(dashedBorder)
     }
 
-    // For icon inside the upload button
     func setUploadIconSize() {
         var config = uploadButton.configuration
         config?.image = UIImage(
@@ -77,8 +159,6 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         uploadButton.configuration = config
     }
 
-
-    //Upload pressed -> choose from gallery -> shpw pic preview
     @IBAction func uploadPressed(_ sender: UIButton) {
         showPhotoPicker()
     }
@@ -101,7 +181,6 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         else { return }
 
         provider.loadObject(ofClass: UIImage.self) { image, _ in
-
             DispatchQueue.main.async {
                 guard let selectedImage = image as? UIImage else { return }
                 self.updateUploadButtonPreview(image: selectedImage)
@@ -111,7 +190,6 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     }
 
     func updateUploadButtonPreview(image: UIImage) {
-
         let preview = image.preparingThumbnail(of: CGSize(width: 50, height: 50))
         var config = uploadButton.configuration
         config?.image = preview
@@ -123,18 +201,134 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         completeButton.isEnabled = true
         completeButton.alpha = 1
     }
-    
+
     @IBAction func completePressed(_ sender: UIButton) {
-
-        DrinkOrDareGameManager.shared.completeTurn()
-
-        performSegue(withIdentifier: "showWaiting", sender: self)
+        submitTurn(pointsDelta: 20)
     }
 
     @IBAction func skipPressed(_ sender: UIButton) {
+        submitTurn(pointsDelta: -5)
+    }
 
-        DrinkOrDareGameManager.shared.skipTurn()
+    func submitTurn(pointsDelta: Int) {
+        guard
+            let gameCode = gameCode,
+            let userId = Auth.auth().currentUser?.uid
+        else {
+            return
+        }
 
-        performSegue(withIdentifier: "showWaiting", sender: self)
+        completeButton.isEnabled = false
+        skipButton.isEnabled = false
+
+        let gameRef = db.collection("games").document(gameCode)
+        let playerRef = gameRef.collection("players").document(userId)
+
+        gameRef.getDocument { snapshot, error in
+            if let error = error {
+                print("Error loading game for turn submission: \(error.localizedDescription)")
+                return
+            }
+
+            guard
+                let gameData = snapshot?.data(),
+                let currentPlayerId = gameData["currentPlayerId"] as? String,
+                currentPlayerId == userId
+            else {
+                return
+            }
+
+            playerRef.getDocument { playerSnapshot, error in
+                if let error = error {
+                    print("Error loading player score: \(error.localizedDescription)")
+                    return
+                }
+
+                let currentPoints = playerSnapshot?.data()?["points"] as? Int ?? 0
+                let updatedPoints = currentPoints + pointsDelta
+
+                playerRef.setData(["points": updatedPoints], merge: true) { error in
+                    if let error = error {
+                        print("Error updating player score: \(error.localizedDescription)")
+                        return
+                    }
+
+                    self.advanceGame(using: gameData)
+                }
+            }
+        }
+    }
+
+    func advanceGame(using gameData: [String: Any]) {
+        guard let gameCode = gameCode else { return }
+
+        let gameRef = db.collection("games").document(gameCode)
+        let playerOrder = gameData["playerOrder"] as? [String] ?? []
+        guard !playerOrder.isEmpty else { return }
+
+        let currentTurnIndex = gameData["currentTurnIndex"] as? Int ?? 0
+        let turnsPlayed = gameData["turnsPlayed"] as? Int ?? 0
+        let totalRounds = gameData["totalRounds"] as? Int ?? DrinkOrDareGameManager.shared.totalRounds
+        let nextTurnsPlayed = turnsPlayed + 1
+
+        if nextTurnsPlayed >= playerOrder.count * totalRounds {
+            gameRef.setData([
+                "gameState": "finished",
+                "turnsPlayed": nextTurnsPlayed
+            ], merge: true) { error in
+                if let error = error {
+                    print("Error finishing game: \(error.localizedDescription)")
+                }
+            }
+            return
+        }
+
+        let nextTurnIndex = (currentTurnIndex + 1) % playerOrder.count
+        let nextPlayerId = playerOrder[nextTurnIndex]
+        let location = gameData["location"] as? String ?? "On Campus"
+        let nextDare = DrinkOrDareGameManager.shared.randomDare(for: location)
+
+        gameRef.collection("players").document(nextPlayerId).getDocument { snapshot, error in
+            if let error = error {
+                print("Error loading next player: \(error.localizedDescription)")
+                return
+            }
+
+            let nextPlayerName = snapshot?.data()?["name"] as? String ?? "Player"
+
+            gameRef.setData([
+                "currentTurnIndex": nextTurnIndex,
+                "currentPlayerId": nextPlayerId,
+                "currentPlayerName": nextPlayerName,
+                "currentDare": nextDare,
+                "turnsPlayed": nextTurnsPlayed
+            ], merge: true) { error in
+                if let error = error {
+                    print("Error advancing game: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    func showWaitingScreen() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let waitingViewController = storyboard.instantiateViewController(withIdentifier: "WaitingViewController") as? WaitingViewController else {
+            return
+        }
+
+        waitingViewController.gameCode = gameCode
+        waitingViewController.navigationItem.hidesBackButton = true
+        navigationController?.pushViewController(waitingViewController, animated: true)
+    }
+
+    func showLeaderboardScreen() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let leaderboardViewController = storyboard.instantiateViewController(withIdentifier: "LeaderboardViewController") as? LeaderboardViewController else {
+            return
+        }
+
+        leaderboardViewController.gameCode = gameCode
+        leaderboardViewController.navigationItem.hidesBackButton = true
+        navigationController?.pushViewController(leaderboardViewController, animated: true)
     }
 }
