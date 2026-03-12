@@ -43,7 +43,10 @@ class HomeViewController: HeaderViewController {
         let alert = UIAlertController(title: "Join Game", message: "Enter Game Code", preferredStyle: .alert)
         alert.addTextField { $0.placeholder = "Game Code" }
         alert.addAction(UIAlertAction(title: "Join", style: .default) { _ in
-            guard let code = alert.textFields?.first?.text, !code.isEmpty else { return }
+            guard let code = alert.textFields?.first?.text?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .uppercased(),
+                  !code.isEmpty else { return }
             self.joinGame(gameCode: code)
         })
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
@@ -96,34 +99,77 @@ class HomeViewController: HeaderViewController {
             if let error = error { print(error); return }
 
             // Add host as player
-            self.db.collection("games").document(code)
-                .collection("players").document(userId)
-                .setData([
-                    "name": Auth.auth().currentUser?.displayName ?? "Player",
-                    "isHost": true
-                ]) { error in
-                    if let error = error { print(error); return }
-                    self.showGameCodeAlert(code: code, location: location)
-                }
+            self.addCurrentUserToGame(gameCode: code, userId: userId, isHost: true) { success in
+                guard success else { return }
+                self.showGameCodeAlert(code: code, location: location)
+            }
         }
     }
     
     func joinGame(gameCode: String) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
 
-        let playerData: [String: Any] = [
-            "name": Auth.auth().currentUser?.displayName ?? "Player",
-            "isHost": false
-        ]
+        let gameDocument = db.collection("games").document(gameCode)
 
-        db.collection("games").document(gameCode)
-            .collection("players").document(userId)
-            .setData(playerData) { error in
-                if let error = error { print("Error joining game: \(error)"); return }
+        gameDocument.getDocument { snapshot, error in
+            if let error = error {
+                print("Error looking up game: \(error)")
+                self.showJoinGameError(message: "We couldn't verify that game code. Please try again.")
+                return
+            }
+
+            guard let snapshot = snapshot, snapshot.exists else {
+                self.showJoinGameError(message: "That game lobby doesn't exist. Check the code and try again.")
+                return
+            }
+
+            self.addCurrentUserToGame(gameCode: gameCode, userId: userId, isHost: false) { success in
+                guard success else {
+                    self.showJoinGameError(message: "Unable to join this game right now. Please try again.")
+                    return
+                }
+
                 print("Joined game \(gameCode)")
-
                 self.goToLobby(with: gameCode)
             }
+        }
+    }
+
+    func addCurrentUserToGame(gameCode: String, userId: String, isHost: Bool, completion: @escaping (Bool) -> Void) {
+        db.collection("users").document(userId).getDocument { snapshot, error in
+            if let error = error {
+                print("Error loading user profile: \(error)")
+                completion(false)
+                return
+            }
+
+            let username = (snapshot?.data()?["username"] as? String)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let playerName = (username?.isEmpty == false) ? username! : "Player"
+
+            self.db.collection("games").document(gameCode)
+                .collection("players").document(userId)
+                .setData([
+                    "name": playerName,
+                    "isHost": isHost,
+                    "points": 0,
+                    "joinedAt": Timestamp()
+                ]) { error in
+                    if let error = error {
+                        print("Error saving player to game: \(error)")
+                        completion(false)
+                        return
+                    }
+
+                    completion(true)
+                }
+        }
+    }
+
+    func showJoinGameError(message: String) {
+        let alert = UIAlertController(title: "Unable to Join Game", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 
     func showGameCodeAlert(code: String, location: String) {

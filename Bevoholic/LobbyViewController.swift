@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 import FirebaseFirestore
 
 class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableViewDataSource {
@@ -16,7 +17,10 @@ class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableVie
     
     var gameCode: String!
     let db = Firestore.firestore()
-    var listener: ListenerRegistration?
+    var playersListener: ListenerRegistration?
+    var gameListener: ListenerRegistration?
+    var players: [(id: String, name: String)] = []
+    var hasRoutedToGameScreen = false
 
     // Store usernames for table view
     var usernames: [String] = []
@@ -29,6 +33,7 @@ class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableVie
         gameCodeLabel.text = "Code: \(gameCode ?? "")"
         tableView.rowHeight = 60
         fetchPlayers()
+        observeGameState()
     }
 
 
@@ -36,7 +41,7 @@ class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableVie
         guard let gameCode = gameCode else { return }
 
         // Listen to the players subcollection
-        listener = db.collection("games")
+        playersListener = db.collection("games")
             .document(gameCode)
             .collection("players")
             .addSnapshotListener { snapshot, error in
@@ -47,27 +52,120 @@ class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableVie
 
                 guard let documents = snapshot?.documents else { return }
 
-                self.usernames = []
+                let sortedDocuments = documents.sorted {
+                    let lhsTimestamp = ($0.data()["joinedAt"] as? Timestamp)?.dateValue() ?? .distantPast
+                    let rhsTimestamp = ($1.data()["joinedAt"] as? Timestamp)?.dateValue() ?? .distantPast
+                    return lhsTimestamp < rhsTimestamp
+                }
 
-                let group = DispatchGroup()
-
-                for doc in documents {
+                self.players = sortedDocuments.map { doc in
                     let data = doc.data()
                     let name = data["name"] as? String ?? "Player"
-                    self.usernames.append(name)
+                    return (id: doc.documentID, name: name)
                 }
-                group.notify(queue: .main) {
+                self.usernames = self.players.map { $0.name }
+
+                DispatchQueue.main.async {
                     self.tableView.reloadData()
                 }
             }
     }
 
-    @IBAction func startButtonPressed(_ sender: Any) {
-        // load players into game manager
-            DrinkOrDareGameManager.shared.setPlayers(usernames)
+    func observeGameState() {
+        guard let gameCode = gameCode else { return }
 
-            // go to dare screen
-            performSegue(withIdentifier: "startSegue", sender: self)
+        gameListener = db.collection("games")
+            .document(gameCode)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+
+                if let error = error {
+                    print("Error observing game state: \(error.localizedDescription)")
+                    return
+                }
+
+                guard
+                    let data = snapshot?.data(),
+                    let gameState = data["gameState"] as? String,
+                    gameState == "inProgress"
+                else {
+                    return
+                }
+
+                self.routeToCurrentTurn(using: data)
+            }
+    }
+
+    func routeToCurrentTurn(using gameData: [String: Any]) {
+        guard
+            !hasRoutedToGameScreen,
+            let currentUserId = Auth.auth().currentUser?.uid,
+            let currentPlayerId = gameData["currentPlayerId"] as? String
+        else {
+            return
+        }
+
+        hasRoutedToGameScreen = true
+
+        if currentUserId == currentPlayerId {
+            showDareScreen()
+        } else {
+            showWaitingScreen()
+        }
+    }
+
+    func showDareScreen() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let dareViewController = storyboard.instantiateViewController(withIdentifier: "DareScreenViewController") as? DareScreenViewController else {
+            return
+        }
+
+        dareViewController.gameCode = gameCode
+        dareViewController.navigationItem.hidesBackButton = true
+        navigationController?.pushViewController(dareViewController, animated: true)
+    }
+
+    func showWaitingScreen() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let waitingViewController = storyboard.instantiateViewController(withIdentifier: "WaitingViewController") as? WaitingViewController else {
+            return
+        }
+
+        waitingViewController.gameCode = gameCode
+        waitingViewController.navigationItem.hidesBackButton = true
+        navigationController?.pushViewController(waitingViewController, animated: true)
+    }
+
+    @IBAction func startButtonPressed(_ sender: Any) {
+        guard let gameCode = gameCode else { return }
+        guard !players.isEmpty else { return }
+
+        db.collection("games").document(gameCode).getDocument { snapshot, error in
+            if let error = error {
+                print("Error loading game for start: \(error.localizedDescription)")
+                return
+            }
+
+            let gameData = snapshot?.data() ?? [:]
+            let location = gameData["location"] as? String ?? "On Campus"
+            let firstPlayer = self.players[0]
+            let currentDare = DrinkOrDareGameManager.shared.randomDare(for: location)
+
+            self.db.collection("games").document(gameCode).setData([
+                "gameState": "inProgress",
+                "playerOrder": self.players.map { $0.id },
+                "currentTurnIndex": 0,
+                "currentPlayerId": firstPlayer.id,
+                "currentPlayerName": firstPlayer.name,
+                "currentDare": currentDare,
+                "turnsPlayed": 0,
+                "totalRounds": DrinkOrDareGameManager.shared.totalRounds
+            ], merge: true) { error in
+                if let error = error {
+                    print("Error starting game: \(error.localizedDescription)")
+                }
+            }
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -87,6 +185,7 @@ class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableVie
     }
 
     deinit {
-        listener?.remove()
+        playersListener?.remove()
+        gameListener?.remove()
     }
 }

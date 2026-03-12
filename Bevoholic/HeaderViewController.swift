@@ -15,6 +15,19 @@ class HeaderViewController: UIViewController {
     }
 
     func setupHeader() {
+        if shouldShowMainMenuButton {
+            let home = UIBarButtonItem(
+                title: "Menu",
+                style: .plain,
+                target: self,
+                action: #selector(openMainMenu)
+            )
+            home.tintColor = .white
+            navigationItem.leftBarButtonItem = home
+        } else {
+            navigationItem.leftBarButtonItem = nil
+        }
+
         let settings = UIBarButtonItem(
             image: UIImage(systemName: "person.circle.fill"),
             style: .plain,
@@ -37,7 +50,17 @@ class HeaderViewController: UIViewController {
         ])
     }
 
+    var shouldShowMainMenuButton: Bool {
+        !(self is HomeViewController)
+    }
+
     @objc func openSettings() {
-        performSegue(withIdentifier: "showSettings", sender: self)
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let settingsViewController = storyboard.instantiateViewController(withIdentifier: "SettingsViewController")
+        navigationController?.pushViewController(settingsViewController, animated: true)
+    }
+
+    @objc func openMainMenu() {
+        navigationController?.popToRootViewController(animated: true)
     }
 }
