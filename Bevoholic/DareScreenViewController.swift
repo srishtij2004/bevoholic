@@ -30,12 +30,16 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     private var gameListener: ListenerRegistration?
     private var playerListener: ListenerRegistration?
     private var hasRoutedAway = false
-
+    
+    var playerDifficulty = "Buzzed Bevo"
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.hidesBackButton = true
         setUploadIconSize()
         addDashedBorder()
+        
+        loadPlayerDifficulty()
 
         completeButton.isEnabled = false
         completeButton.alpha = 0.5
@@ -74,6 +78,48 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
             self.routeIfNeeded(using: data)
         }
     }
+    
+    func loadPlayerDifficulty() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+
+        db.collection("users").document(uid).getDocument { snapshot, error in
+            if let error = error {
+                print("Error loading difficulty: \(error.localizedDescription)")
+                return
+            }
+
+            let difficulty = snapshot?.data()?["difficulty"] as? String ?? "Buzzed Bevo"
+            self.playerDifficulty = difficulty
+
+            DispatchQueue.main.async {
+                self.updateDifficultyUI()
+            }
+        }
+    }
+    
+    func updateDifficultyUI() {
+        gameModeLabel.text = " Game Mode: \(playerDifficulty)"
+
+        switch playerDifficulty {
+            
+        case "Buzzkill Bevo":
+            skipButton.setTitle("Skip -5 pts", for: .normal)
+
+        case "Buzzed Bevo":
+            skipButton.setTitle("Skip! Take a shot! -5 pts", for: .normal)
+
+        case "Bevoholic":
+
+            let shotText = Bool.random()
+            ? "Skip! Take 2 shots! -5 pts"
+            : "Skip! Take 1 shot! -5 pts"
+
+            skipButton.setTitle(shotText, for: .normal)
+
+        default:
+            skipButton.setTitle("Skip -5 pts", for: .normal)
+        }
+    }
 
     func observeCurrentPlayer() {
         guard
@@ -96,17 +142,19 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
                 }
 
                 let points = snapshot?.data()?["points"] as? Int ?? 0
-                self.playerPoints.text = "\(points) Points"
+                self.playerPoints.text = "\(points)"
             }
     }
 
     func updateUI(with gameData: [String: Any]) {
+
         usernameLabel.text = gameData["currentPlayerName"] as? String ?? "Player"
-        gameModeLabel.text = gameData["gameType"] as? String ?? "Drink or Dare"
 
         let location = gameData["location"] as? String ?? "On Campus"
-        dareModeLabel.text = location
+        dareModeLabel.text = " Dare Mode: \(location)"
+
         dare.text = gameData["currentDare"] as? String ?? ""
+
         locationButton.isHidden = location == "Kickback"
     }
 

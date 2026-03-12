@@ -4,10 +4,10 @@
 //
 //  Created by Srishti Jain on 3/9/26.
 //
-
-
-import Foundation
-
+//
+//
+//import Foundation
+//
 struct Player {
     var name: String
     var points: Int
@@ -132,28 +132,6 @@ class DrinkOrDareGameManager {
         }
 
         currentDare = nextDare()
-    }
-
-    func dareModeText() -> String {
-        switch selectedDareMode {
-        case .onCampus:
-            return "On Campus"
-        case .westCampus:
-            return "West Campus"
-        case .kickback:
-            return "Kickback"
-        }
-    }
-
-    func gameModeText() -> String {
-        switch selectedGameMode {
-        case .buzzedBevo:
-            return "Buzzed Bevo"
-        case .bevoHolic:
-            return "BevoHolic"
-        case .buzzkillBevo:
-            return "Buzzkill Bevo"
-        }
     }
 
     func randomDare(for location: String) -> String {

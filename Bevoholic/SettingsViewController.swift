@@ -14,7 +14,7 @@ class SettingsViewController: UIViewController {
 
     let db = Firestore.firestore()
 
-    var selectedDifficulty = "Bevoholic"
+    var selectedDifficulty = "Buzzed Bevo"
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,7 +53,7 @@ class SettingsViewController: UIViewController {
         case "Buzzkill Bevo":
             buzzkillButton.tintColor = .systemOrange
         default:
-            bevoholicButton.tintColor = .systemOrange
+            buzzedButton.tintColor = .systemOrange
         }
     }
 
@@ -78,7 +78,7 @@ class SettingsViewController: UIViewController {
 
             self.usernameTextField.text = data["username"] as? String ?? ""
 
-            let savedDifficulty = data["difficulty"] as? String ?? "Bevoholic"
+            let savedDifficulty = data["difficulty"] as? String ?? "Buzzed Bevo"
             self.selectedDifficulty = savedDifficulty
             self.updateDifficultyUI()
         }
