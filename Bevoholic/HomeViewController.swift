@@ -20,6 +20,10 @@ class HomeViewController: HeaderViewController {
         showGameOptions()
     }
 
+    @IBAction func imposterTapped(_ sender: UIButton) {
+        showImposterOptions()
+    }
+
     func showGameOptions() {
         let actionSheet = UIAlertController(
             title: "Drink or Dare",
@@ -193,5 +197,121 @@ class HomeViewController: HeaderViewController {
             lobbyVC.gameCode = gameCode
             navigationController?.pushViewController(lobbyVC, animated: true)
         }
+    }
+
+    func showImposterOptions() {
+        let actionSheet = UIAlertController(
+            title: "Imposter",
+            message: "Do you want to join or create a game?",
+            preferredStyle: .actionSheet
+        )
+
+        actionSheet.addAction(UIAlertAction(title: "Join Game", style: .default) { _ in
+            self.showJoinImposterAlert()
+        })
+
+        actionSheet.addAction(UIAlertAction(title: "Create Game", style: .default) { _ in
+            self.createImposterGame()
+        })
+
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(actionSheet, animated: true)
+    }
+
+    func showJoinImposterAlert() {
+        let alert = UIAlertController(title: "Join Imposter Game", message: "Enter Game Code", preferredStyle: .alert)
+        alert.addTextField { $0.placeholder = "Game Code" }
+        alert.addAction(UIAlertAction(title: "Join", style: .default) { _ in
+            guard
+                let code = alert.textFields?.first?.text?
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .uppercased(),
+                !code.isEmpty
+            else {
+                return
+            }
+            self.joinImposterGame(gameCode: code)
+        })
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
+    }
+
+    func createImposterGame() {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let code = generateGameCode()
+
+        let gameData: [String: Any] = [
+            "hostId": userId,
+            "gameType": "Imposter",
+            "gameState": "lobby",
+            "createdAt": Timestamp()
+        ]
+
+        db.collection("games").document(code).setData(gameData) { error in
+            if let error = error {
+                print("Error creating imposter game: \(error.localizedDescription)")
+                return
+            }
+
+            self.addCurrentUserToGame(gameCode: code, userId: userId, isHost: true) { success in
+                guard success else { return }
+                self.showImposterCodeAlert(code: code)
+            }
+        }
+    }
+
+    func joinImposterGame(gameCode: String) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let gameDocument = db.collection("games").document(gameCode)
+
+        gameDocument.getDocument { snapshot, error in
+            if let error = error {
+                print("Error looking up imposter game: \(error)")
+                self.showJoinGameError(message: "We couldn't verify that game code. Please try again.")
+                return
+            }
+
+            guard let snapshot = snapshot, snapshot.exists else {
+                self.showJoinGameError(message: "That game lobby doesn't exist. Check the code and try again.")
+                return
+            }
+
+            let gameType = snapshot.data()?["gameType"] as? String ?? ""
+            guard gameType == "Imposter" else {
+                self.showJoinGameError(message: "That code is not for an Imposter game.")
+                return
+            }
+
+            self.addCurrentUserToGame(gameCode: gameCode, userId: userId, isHost: false) { success in
+                guard success else {
+                    self.showJoinGameError(message: "Unable to join this game right now. Please try again.")
+                    return
+                }
+                self.goToImposterLobby(with: gameCode)
+            }
+        }
+    }
+
+    func showImposterCodeAlert(code: String) {
+        let alert = UIAlertController(
+            title: "Imposter Game Created",
+            message: "Share this code:\n\(code)",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            self.goToImposterLobby(with: code)
+        })
+
+        present(alert, animated: true)
+    }
+
+    func goToImposterLobby(with gameCode: String) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let lobbyVC = storyboard.instantiateViewController(withIdentifier: "ImposterLobbyViewController") as? ImposterLobbyViewController else {
+            return
+        }
+        lobbyVC.gameCode = gameCode
+        navigationController?.pushViewController(lobbyVC, animated: true)
     }
 }
