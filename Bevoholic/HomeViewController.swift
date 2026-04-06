@@ -5,11 +5,14 @@ import FirebaseFirestore
 
 class HomeViewController: HeaderViewController {
 
+    @IBOutlet weak var calButton: UIButton!
     let db = Firestore.firestore()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        calButton.titleLabel?.textAlignment = .center
     }
-    
+
     @IBAction func profileTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SettingsViewController")
@@ -17,13 +20,107 @@ class HomeViewController: HeaderViewController {
     }
     
     @IBAction func drinkOrDareTapped(_ sender: UIButton) {
-        showGameOptions()
+        showOptions(for: "Drink or Dare")
     }
 
     @IBAction func imposterTapped(_ sender: UIButton) {
-        showImposterOptions()
+        showOptions(for: "Imposter")
     }
 
+    @IBAction func cardsAgainstLonghornsTapped(_ sender: UIButton) {
+        showOptions(for: "Cards Against Longhorns")
+    }
+    
+    func showOptions(for gameType: String) {
+        let actionSheet = UIAlertController(
+            title: gameType,
+            message: "Do you want to join or create a game?",
+            preferredStyle: .actionSheet
+        )
+
+        actionSheet.addAction(UIAlertAction(title: "Join Game", style: .default) { _ in
+            self.showJoinAlert(for: gameType)
+        })
+
+        actionSheet.addAction(UIAlertAction(title: "Create Game", style: .default) { _ in
+            if gameType == "Drink or Dare" {
+                self.showCreateGameOptions()
+            } else {
+                self.createGenericGame(type: gameType)
+            }
+        })
+
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(actionSheet, animated: true)
+    }
+    
+    func showJoinAlert(for gameType: String) {
+        let alert = UIAlertController(title: "Join \(gameType)", message: "Enter Game Code", preferredStyle: .alert)
+        alert.addTextField { $0.placeholder = "Game Code" }
+        
+        alert.addAction(UIAlertAction(title: "Join", style: .default) { _ in
+            guard let code = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), !code.isEmpty else { return }
+            self.validateAndJoin(code: code, expectedType: gameType)
+        })
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(alert, animated: true)
+    }
+    
+    func validateAndJoin(code: String, expectedType: String) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        
+        db.collection("games").document(code).getDocument { snapshot, error in
+            guard let snapshot = snapshot, snapshot.exists,
+                  let actualType = snapshot.data()?["gameType"] as? String else {
+                self.showJoinGameError(message: "Game not found.")
+                return
+            }
+
+            if actualType == expectedType {
+                self.addCurrentUserToGame(gameCode: code, userId: userId, isHost: false) { success in
+                    if success { self.routeToCorrectLobby(type: actualType, code: code) }
+                }
+            } else {
+                self.showJoinGameError(message: "This code is for \(actualType), not \(expectedType).")
+            }
+        }
+    }
+
+    func routeToCorrectLobby(type: String, code: String) {
+        switch type {
+        case "Drink or Dare": goToLobby(with: code)
+        case "Imposter": goToImposterLobby(with: code)
+        //case "Cards Against Longhorns": goToCALLobby(with: code)
+        default: break
+        }
+    }
+    
+    func createGenericGame(type: String) {
+        guard let userId = Auth.auth().currentUser?.uid else { return }
+        let code = generateGameCode()
+
+        // Matches your existing Imposter gameData exactly
+        let gameData: [String: Any] = [
+            "hostId": userId,
+            "gameType": type,
+            "gameState": "lobby",
+            "createdAt": Timestamp()
+        ]
+
+        db.collection("games").document(code).setData(gameData) { error in
+            if let error = error { print(error); return }
+
+            self.addCurrentUserToGame(gameCode: code, userId: userId, isHost: true) { success in
+                guard success else { return }
+                
+                if type == "Imposter" {
+                    self.showImposterCodeAlert(code: code)
+                }
+            }
+        }
+    }
+    
     func showGameOptions() {
         let actionSheet = UIAlertController(
             title: "Drink or Dare",

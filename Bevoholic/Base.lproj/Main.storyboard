@@ -223,7 +223,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="yaA-Gq-gEa">
-                                <rect key="frame" x="20" y="186" width="400" height="460"/>
+                                <rect key="frame" x="20" y="186" width="400" height="695"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Yvp-Hs-Yzm">
                                         <rect key="frame" x="0.0" y="0.0" width="400" height="225"/>
@@ -251,13 +251,12 @@
                                             <accessibilityTraits key="traits" button="YES" image="YES"/>
                                         </accessibility>
                                         <constraints>
-                                            <constraint firstAttribute="width" secondItem="1w6-ae-N4p" secondAttribute="height" multiplier="16:9" id="cmY-7b-xbY"/>
-                                            <constraint firstAttribute="width" secondItem="1w6-ae-N4p" secondAttribute="height" multiplier="16:9" id="qa8-x7-7rv"/>
+                                            <constraint firstAttribute="width" secondItem="1w6-ae-N4p" secondAttribute="height" multiplier="16:9" id="1jq-mL-aWE"/>
                                         </constraints>
                                         <color key="tintColor" systemColor="labelColor"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="tinted" title="Imposter">
-                                            <backgroundConfiguration key="background" image="drinkordare"/>
+                                            <backgroundConfiguration key="background" image="imposter"/>
                                             <fontDescription key="titleFontDescription" name="HoeflerText-Regular" family="Hoefler Text" pointSize="50"/>
                                             <color key="baseForegroundColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                             <color key="baseBackgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -266,9 +265,40 @@
                                             <action selector="imposterTapped:" destination="nF2-Of-39h" eventType="touchUpInside" id="nPa-Tr-lei"/>
                                         </connections>
                                     </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="wordWrap" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8Lf-T0-cEK">
+                                        <rect key="frame" x="0.0" y="470" width="400" height="225"/>
+                                        <accessibility key="accessibilityConfiguration">
+                                            <accessibilityTraits key="traits" button="YES" image="YES"/>
+                                        </accessibility>
+                                        <constraints>
+                                            <constraint firstAttribute="width" secondItem="8Lf-T0-cEK" secondAttribute="height" multiplier="16:9" id="d97-oi-98B"/>
+                                        </constraints>
+                                        <color key="tintColor" systemColor="labelColor"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="Cards against Longhorns" backgroundImage="cardsAgainstLonghorns">
+                                            <attributedString key="attributedTitle">
+                                                <fragment content="Cards against Longhorns">
+                                                    <attributes>
+                                                        <color key="NSColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                                        <font key="NSFont" size="50" name="HoeflerText-Regular"/>
+                                                        <font key="NSOriginalFont" size="12" name="Helvetica"/>
+                                                        <paragraphStyle key="NSParagraphStyle" alignment="center" lineBreakMode="wordWrapping" baseWritingDirection="natural" tighteningFactorForTruncation="0.0"/>
+                                                    </attributes>
+                                                </fragment>
+                                            </attributedString>
+                                        </state>
+                                        <buttonConfiguration key="configuration" style="tinted" title="Cards against Longhorns">
+                                            <backgroundConfiguration key="background" image="cardsAgainstLonghorns"/>
+                                            <fontDescription key="titleFontDescription" name="HoeflerText-Regular" family="Hoefler Text" pointSize="50"/>
+                                            <color key="baseForegroundColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                        </buttonConfiguration>
+                                        <connections>
+                                            <action selector="cardsTapped:" destination="nF2-Of-39h" eventType="touchUpInside" id="vtN-hV-uga"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="Yvp-Hs-Yzm" firstAttribute="top" secondItem="yaA-Gq-gEa" secondAttribute="top" constant="80" id="g0j-fr-VhN"/>
+                                    <constraint firstItem="Yvp-Hs-Yzm" firstAttribute="top" secondItem="yaA-Gq-gEa" secondAttribute="top" constant="25" id="g0j-fr-VhN"/>
                                 </constraints>
                             </stackView>
                         </subviews>
@@ -284,6 +314,7 @@
                     <navigationItem key="navigationItem" id="jSr-Ax-wSB"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="calButton" destination="8Lf-T0-cEK" id="FGy-Ye-4jy"/>
                         <segue destination="6p0-P9-Vuo" kind="show" identifier="showSettings" id="jDL-HB-cAg"/>
                     </connections>
                 </viewController>
@@ -507,13 +538,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GAME LOBBY" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Gfo-eH-0D0">
-                                <rect key="frame" x="151.33333333333331" y="185" width="137.33333333333331" height="26.333333333333343"/>
+                                <rect key="frame" x="151.33333333333331" y="190" width="137.33333333333331" height="26.333333333333343"/>
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="22"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="JT1-c9-aKf">
-                                <rect key="frame" x="0.0" y="252.33333333333331" width="440" height="625.33333333333348"/>
+                                <rect key="frame" x="0.0" y="257.33333333333331" width="440" height="620.33333333333348"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="PlayerCell" rowHeight="60" id="COc-dN-kcL" customClass="PlayerCell" customModule="Bevoholic" customModuleProvider="target">
@@ -568,13 +599,13 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4jR-G4-NSI">
-                                <rect key="frame" x="199.33333333333334" y="213.33333333333334" width="41.333333333333343" height="21"/>
+                                <rect key="frame" x="199.33333333333334" y="218.33333333333334" width="41.333333333333343" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Drink or Dare" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5TL-SN-21i">
-                                <rect key="frame" x="128.66666666666666" y="147" width="182.99999999999997" height="30"/>
+                                <rect key="frame" x="128.66666666666666" y="152" width="182.99999999999997" height="30"/>
                                 <fontDescription key="fontDescription" name="HoeflerText-Regular" family="Hoefler Text" pointSize="30"/>
                                 <color key="textColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <nil key="highlightedColor"/>
@@ -595,7 +626,7 @@
                             <constraint firstItem="5PI-YZ-Tvf" firstAttribute="trailing" secondItem="Xcd-24-xwF" secondAttribute="trailing" constant="68" id="qOt-ma-gHB"/>
                             <constraint firstItem="4jR-G4-NSI" firstAttribute="centerX" secondItem="QAR-In-jTX" secondAttribute="centerX" id="sLW-uN-vld"/>
                             <constraint firstItem="Xcd-24-xwF" firstAttribute="centerX" secondItem="QAR-In-jTX" secondAttribute="centerX" id="t2G-Rv-AU3"/>
-                            <constraint firstItem="5TL-SN-21i" firstAttribute="top" secondItem="5PI-YZ-Tvf" secondAttribute="top" constant="85" id="tue-VQ-DBn"/>
+                            <constraint firstItem="5TL-SN-21i" firstAttribute="top" secondItem="5PI-YZ-Tvf" secondAttribute="top" constant="90" id="tue-VQ-DBn"/>
                             <constraint firstItem="Xcd-24-xwF" firstAttribute="top" secondItem="JT1-c9-aKf" secondAttribute="bottom" constant="10" id="vl2-I2-P4J"/>
                         </constraints>
                     </view>
@@ -825,13 +856,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="GAME LOBBY" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="azP-2h-gT4">
-                                <rect key="frame" x="151.33333333333331" y="180" width="137.33333333333331" height="26.333333333333343"/>
+                                <rect key="frame" x="151.33333333333331" y="190" width="137.33333333333331" height="26.333333333333343"/>
                                 <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="22"/>
-                                <nil key="textColor"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="jIE-4c-qM8">
-                                <rect key="frame" x="0.0" y="247.33333333333331" width="440" height="630.33333333333348"/>
+                                <rect key="frame" x="0.0" y="257.33333333333331" width="440" height="620.33333333333348"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="PlayerCell" rowHeight="60" id="g0n-t3-bSP" customClass="PlayerCell" customModule="Bevoholic" customModuleProvider="target">
@@ -886,13 +917,13 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8kV-Ez-faq">
-                                <rect key="frame" x="199.33333333333334" y="208.33333333333334" width="41.333333333333343" height="21"/>
+                                <rect key="frame" x="199.33333333333334" y="218.33333333333334" width="41.333333333333343" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Imposter" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZxM-Po-Z2a">
-                                <rect key="frame" x="161.66666666666666" y="142" width="116.66666666666666" height="30"/>
+                                <rect key="frame" x="161.66666666666666" y="152" width="116.66666666666666" height="30"/>
                                 <fontDescription key="fontDescription" name="HoeflerText-Regular" family="Hoefler Text" pointSize="30"/>
                                 <color key="textColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <nil key="highlightedColor"/>
@@ -902,7 +933,7 @@
                         <color key="backgroundColor" red="0.79997003079999995" green="0.40556967259999999" blue="0.1448230445" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="jIE-4c-qM8" firstAttribute="top" secondItem="8kV-Ez-faq" secondAttribute="bottom" constant="18" id="KaI-Qx-LRR"/>
-                            <constraint firstItem="ZxM-Po-Z2a" firstAttribute="top" secondItem="MAc-9W-1rC" secondAttribute="top" constant="80" id="PqA-AG-jdj"/>
+                            <constraint firstItem="ZxM-Po-Z2a" firstAttribute="top" secondItem="MAc-9W-1rC" secondAttribute="top" constant="90" id="PqA-AG-jdj"/>
                             <constraint firstItem="jIE-4c-qM8" firstAttribute="leading" secondItem="1ot-cz-U87" secondAttribute="leading" id="RcJ-11-3EC"/>
                             <constraint firstItem="azP-2h-gT4" firstAttribute="centerX" secondItem="1ot-cz-U87" secondAttribute="centerX" id="XR8-c3-t1K"/>
                             <constraint firstItem="kV9-kD-fAK" firstAttribute="bottom" secondItem="MAc-9W-1rC" secondAttribute="bottom" id="eVY-XW-oec"/>
@@ -1033,7 +1064,9 @@
     <resources>
         <image name="Logo" width="741" height="256"/>
         <image name="Screenshot_2026-03-09_at_1.58.06_PM-removebg-preview" width="280" height="122"/>
+        <image name="cardsAgainstLonghorns" width="491" height="268"/>
         <image name="drinkordare" width="491" height="268"/>
+        <image name="imposter" width="491" height="268"/>
         <image name="person.circle.fill" catalog="system" width="128" height="123"/>
         <image name="person.crop.circle.fill" catalog="system" width="128" height="123"/>
         <image name="pin.circle.fill" catalog="system" width="128" height="123"/>
