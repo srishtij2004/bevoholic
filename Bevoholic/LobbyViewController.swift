@@ -175,11 +175,25 @@ class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableVie
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cell = tableView.dequeueReusableCell(withIdentifier: "PlayerCell", for: indexPath) as! PlayerCell
-
         let username = usernames[indexPath.row]
+        let playerId = players[indexPath.row].id
 
         cell.usernameLabel.text = username
-        cell.avatarImageView.image = UIImage(systemName: "person.circle.fill")
+
+        //get selected avatar from firestore
+        db.collection("users").document(playerId).getDocument { snapshot, error in
+            if let data = snapshot?.data(), let avatarName = data["selectedAvatar"] as? String {
+                DispatchQueue.main.async {
+                    cell.avatarImageView.image = UIImage(named: avatarName)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    cell.avatarImageView.image = UIImage(named: "longhornHead")
+                    cell.avatarImageView.backgroundColor = UIColor(red: 250/255, green: 193/255, blue: 145/255, alpha: 1.0)
+
+                }
+            }
+        }
 
         return cell
     }
