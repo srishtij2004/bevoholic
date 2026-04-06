@@ -24,6 +24,7 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     @IBOutlet weak var completeButton: UIButton!
     @IBOutlet weak var skipButton: UIButton!
 
+    @IBOutlet weak var avatarImageView: PlayerProfile!
     var gameCode: String!
 
     private let db = Firestore.firestore()
@@ -49,7 +50,6 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        hasRoutedAway = false
         observeGame()
         observeCurrentPlayer()
     }
@@ -147,7 +147,18 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     }
 
     func updateUI(with gameData: [String: Any]) {
-
+        if let currentPlayerId = gameData["currentPlayerId"] as? String {
+                
+                db.collection("users").document(currentPlayerId).getDocument { [weak self] snapshot, error in
+                    guard let self = self,
+                          let data = snapshot?.data(),
+                          let avatarName = data["selectedAvatar"] as? String else { return }
+                    
+                    DispatchQueue.main.async {
+                        self.avatarImageView.image = UIImage(named: avatarName)
+                    }
+                }
+        }
         usernameLabel.text = gameData["currentPlayerName"] as? String ?? "Player"
 
         let location = gameData["location"] as? String ?? "On Campus"
@@ -159,8 +170,9 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     }
 
     func routeIfNeeded(using gameData: [String: Any]) {
+        guard !hasRoutedAway else { return }
+        
         guard
-            !hasRoutedAway,
             let currentUserId = Auth.auth().currentUser?.uid,
             let gameState = gameData["gameState"] as? String
         else {

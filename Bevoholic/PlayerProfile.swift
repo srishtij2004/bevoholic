@@ -22,9 +22,8 @@ class PlayerProfile: UIImageView {
     private func setup() {
         clipsToBounds = true
         contentMode = .scaleAspectFill
-
-        // default avatar
-        image = UIImage(systemName: "person.circle.fill")
-        tintColor = .systemOrange
+        //default
+        image = UIImage(named: "longhornHead")
+        backgroundColor = UIColor(red: 250/255, green: 193/255, blue: 145/255, alpha: 1.0) 
     }
 }
