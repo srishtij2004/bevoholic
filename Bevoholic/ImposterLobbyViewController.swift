@@ -92,10 +92,10 @@ class ImposterLobbyViewController: HeaderViewController, UITableViewDelegate, UI
     @IBAction func startButtonPressed(_ sender: Any) {
         guard let gameCode = gameCode else { return }
     
-        guard players.count >= 3 else {
-            showAlert(title: "Need More Players", message: "Imposter needs at least 3 players to start.")
-            return
-        }
+//        guard players.count >= 3 else {
+//            showAlert(title: "Need More Players", message: "Imposter needs at least 3 players to start.")
+//            return
+//        }
 
         guard let currentUserId = Auth.auth().currentUser?.uid else { return }
 
@@ -106,7 +106,7 @@ class ImposterLobbyViewController: HeaderViewController, UITableViewDelegate, UI
                 return
             }
 
-            let activePlayerIds = self.players.map { $0.id }
+            let activePlayerIds = ["1", "2", "3"]
             let imposterId = activePlayerIds.randomElement() ?? activePlayerIds[0]
             let speakerOrder = activePlayerIds.shuffled()
             let randomContent = ImposterGameManager.shared.randomCategoryAndWord()
@@ -164,5 +164,10 @@ class ImposterLobbyViewController: HeaderViewController, UITableViewDelegate, UI
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        hasRoutedToGame = false
     }
 }

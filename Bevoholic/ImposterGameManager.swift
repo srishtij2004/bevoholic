@@ -6,11 +6,31 @@ final class ImposterGameManager {
     private init() {}
 
     private let categories: [String: [String]] = [
-        "Fruits": ["Apple", "Banana", "Orange", "Mango", "Pineapple", "Strawberry", "Grape"],
-        "Movies": ["Titanic", "Inception", "Terminator", "Avatar", "Jaws", "Gladiator", "Rocky"],
-        "Animals": ["Lion", "Elephant", "Dolphin", "Tiger", "Giraffe", "Penguin", "Kangaroo"],
-        "Countries": ["Brazil", "Canada", "Japan", "Italy", "India", "Mexico", "Spain"],
-        "Sports": ["Soccer", "Basketball", "Baseball", "Tennis", "Golf", "Hockey", "Volleyball"]
+        
+        "UT Places": [
+            "PCL", "Gregory Gym", "UT Tower", "DKR Stadium", "Moody Center",
+            "West Campus", "Speedway", "FAC", "Jester", "Littlefield Fountain"
+        ],
+        
+        "UT Athletes": [
+            "Arch Manning", "Quinn Ewers", "Bijan Robinson", "Vince Young",
+            "Kevin Durant", "Colt McCoy", "Jordan Whittington"
+        ],
+        
+        "UT Culture": [
+            "Hook 'em", "Burnt Orange", "Bevo", "Longhorn Band",
+            "Sixth Street", "Tailgate", "Game Day", "Texas Fight"
+        ],
+        
+        "UT Food & Spots": [
+            "Cabo Bob's", "Pluckers", "Torchy's",
+            "Kerbey Lane", "In-N-Out", "Chick-fil-A"
+        ],
+        
+        "UT Classes & Majors": [
+            "CS Major", "Business Major", "Pre-Med",
+            "Engineering"
+        ]
     ]
 
     func randomCategoryAndWord() -> (category: String, word: String) {
