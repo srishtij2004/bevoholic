@@ -36,7 +36,7 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
         let result = ImposterGameManager.shared.randomCategoryAndWord()
 
         categoryLabel.text = "IMPOSTER"
-        roundLabel.text = "Round 1"
+        roundLabel.text = "Round 1" // TODO: replace this with dynamic label changes based on the round number
         promptLabel.text = "Your word is"
         wordLabel.text = result.word
         statusLabel.text = "Describe it without saying it!"
@@ -66,7 +66,7 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
                     statusLabel.font = UIFont.boldSystemFont(ofSize: 18)
                     statusLabel.textAlignment = .center
                     statusLabel.numberOfLines = 0
-                    statusLabel.text = "\(actualImposter) takes a shot"
+                    statusLabel.text = "\(actualImposter) takes a shot!" // TODO: update based on game mode if buzzkill bevo just say "actual imposter loses" is buzzed bevo leave it as take a shot, and if bevoholic do take 2 shotd
                     doneButton.isHidden = false
                     doneButton.setTitle("Play Again", for: .normal)
                 } else {

@@ -91,7 +91,7 @@ class HomeViewController: HeaderViewController {
         switch type {
         case "Drink or Dare": goToLobby(with: code)
         case "Imposter": goToImposterLobby(with: code)
-        //case "Cards Against Longhorns": goToCALLobby(with: code)
+        case "Cards Against Longhorns": goToCALLobby(with: code)
         default: break
         }
     }
@@ -117,8 +117,24 @@ class HomeViewController: HeaderViewController {
                 if type == "Imposter" {
                     self.showImposterCodeAlert(code: code)
                 }
+                if type == "Cards Against Longhorns" {
+                    self.showCALCodeAlert(code: code)
+                }
             }
         }
+    }
+    func showCALCodeAlert(code: String) {
+        let alert = UIAlertController(
+            title: "Cards against Longhorns Game Created",
+            message: "Share this code:\n\(code)",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            self.goToCALLobby(with: code)
+        })
+
+        present(alert, animated: true)
     }
     
     func showGameOptions() {
@@ -294,6 +310,16 @@ class HomeViewController: HeaderViewController {
             lobbyVC.gameCode = gameCode
             navigationController?.pushViewController(lobbyVC, animated: true)
         }
+    }
+    
+    func goToCALLobby(with gameCode: String) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let lobbyVC = storyboard.instantiateViewController(withIdentifier: "CardsAgainstLonghornsLobbyViewController") as? CardsAgainstLonghornsLobbyViewController else {
+            print("Failed to instantiate Lobby VC")
+            return
+        }
+        lobbyVC.gameCode = gameCode
+        navigationController?.pushViewController(lobbyVC, animated: true)
     }
 
     func showImposterOptions() {
