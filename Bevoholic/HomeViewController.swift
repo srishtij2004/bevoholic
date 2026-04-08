@@ -19,6 +19,12 @@ class HomeViewController: HeaderViewController {
         navigationController?.pushViewController(vc, animated: true)
     }
     
+    @IBAction func inforTapped(_ sender: Any) {
+        if let instructionsVC = self.storyboard?.instantiateViewController(withIdentifier: "GameInfoVC") as? GameInfoVC {
+            self.navigationController?.pushViewController(instructionsVC, animated: true)
+        }
+    }
+    
     @IBAction func drinkOrDareTapped(_ sender: UIButton) {
         showOptions(for: "Drink or Dare")
     }
