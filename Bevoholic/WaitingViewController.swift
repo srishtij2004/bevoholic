@@ -37,13 +37,16 @@ class WaitingViewController: HeaderViewController {
     }
     
     func observeGame() {
-        guard let gameCode = gameCode else { return }
+        guard let gameCode = gameCode else {
+            return
+        }
         
         gameListener = db.collection("games").document(gameCode).addSnapshotListener { [weak self] snapshot, error in
-            guard let self = self else { return }
+            guard let self = self else {
+                return
+            }
             
             if let error = error {
-                print("Error: \(error.localizedDescription)")
                 return
             }
             
@@ -52,7 +55,9 @@ class WaitingViewController: HeaderViewController {
                 let currentUserId = Auth.auth().currentUser?.uid,
                 let gameData = snapshot?.data(),
                 let gameState = gameData["gameState"] as? String
-            else { return }
+            else {
+                return
+            }
             
             if gameState == "voting" {
                 self.hasNavigated = true
@@ -60,12 +65,17 @@ class WaitingViewController: HeaderViewController {
                 return
             }
             
+            if gameState == "results" {
+                self.hasNavigated = true
+                self.showWinnerScreen()
+                return
+            }
+            
             if gameState == "submitting" {
-                // Check for Host button
                 if let playerOrder = gameData["playerOrder"] as? [String], playerOrder.first == currentUserId {
                     self.startVotingButton.isHidden = false
                 }
-                return // Exit early so the turn-based logic below doesn't fire
+                return
             }
             
             if gameState == "finished" {
@@ -80,14 +90,17 @@ class WaitingViewController: HeaderViewController {
             }
         }
     }
+    
     @IBAction func startVotingPressed(_ sender: UIButton) {
-        guard let gameCode = gameCode else { return }
+        guard let gameCode = gameCode else {
+            return
+        }
 
         db.collection("games").document(gameCode).updateData([
             "gameState": "voting"
         ]) { error in
             if let error = error {
-                print("Error starting vote: \(error.localizedDescription)")
+                return
             }
         }
     }
@@ -113,10 +126,22 @@ class WaitingViewController: HeaderViewController {
         leaderboardViewController.navigationItem.hidesBackButton = true
         navigationController?.pushViewController(leaderboardViewController, animated: true)
     }
+    
     func showVotingScreen() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let votingVC = storyboard.instantiateViewController(withIdentifier: "CardsAgainstLonghornsVotingViewController") as? CardsAgainstLonghornsVotingViewController else { return }
+        guard let votingVC = storyboard.instantiateViewController(withIdentifier: "CALVotingVC") as? CALVotingVC else {
+            return
+        }
         votingVC.gameCode = gameCode
         navigationController?.pushViewController(votingVC, animated: true)
+    }
+    
+    func showWinnerScreen() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let winnerVC = storyboard.instantiateViewController(withIdentifier: "CALWinnerVC") as? CALWinnerVC else {
+            return
+        }
+        winnerVC.gameCode = gameCode
+        navigationController?.pushViewController(winnerVC, animated: true)
     }
 }

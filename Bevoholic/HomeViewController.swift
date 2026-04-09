@@ -320,7 +320,7 @@ class HomeViewController: HeaderViewController {
     
     func goToCALLobby(with gameCode: String) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let lobbyVC = storyboard.instantiateViewController(withIdentifier: "CardsAgainstLonghornsLobbyViewController") as? CardsAgainstLonghornsLobbyViewController else {
+        guard let lobbyVC = storyboard.instantiateViewController(withIdentifier: "CALLobbyVC") as? CALLobbyVC else {
             print("Failed to instantiate Lobby VC")
             return
         }

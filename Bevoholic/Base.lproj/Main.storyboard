@@ -237,16 +237,57 @@
                         <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="wordWrap" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8Lf-T0-cEK">
-                                <rect key="frame" x="20" y="697" width="400" height="156"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1w6-ae-N4p">
+                                <rect key="frame" x="20" y="505" width="400" height="172"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <accessibility key="accessibilityConfiguration">
                                     <accessibilityTraits key="traits" button="YES" image="YES"/>
                                 </accessibility>
-                                <constraints>
-                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="156" id="4WN-8W-bxp"/>
-                                    <constraint firstAttribute="height" constant="156" id="oXe-c5-pIs"/>
-                                    <constraint firstAttribute="width" constant="400" id="ygm-nl-7fB"/>
-                                </constraints>
+                                <color key="tintColor" systemColor="labelColor"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="tinted" title="Imposter">
+                                    <backgroundConfiguration key="background" image="imposter"/>
+                                    <fontDescription key="titleFontDescription" name="HoeflerText-Regular" family="Hoefler Text" pointSize="50"/>
+                                    <color key="baseForegroundColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                    <color key="baseBackgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="imposterTapped:" destination="nF2-Of-39h" eventType="touchUpInside" id="nPa-Tr-lei"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Yvp-Hs-Yzm">
+                                <rect key="frame" x="20" y="314" width="400" height="172"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <accessibility key="accessibilityConfiguration">
+                                    <accessibilityTraits key="traits" button="YES" image="YES"/>
+                                </accessibility>
+                                <color key="tintColor" systemColor="labelColor"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="tinted" title="Drink or Dare">
+                                    <backgroundConfiguration key="background" image="drinkordare"/>
+                                    <fontDescription key="titleFontDescription" name="HoeflerText-Regular" family="Hoefler Text" pointSize="50"/>
+                                    <color key="baseForegroundColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                    <color key="baseBackgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="drinkOrDareTapped:" destination="nF2-Of-39h" eventType="touchUpInside" id="9oW-Ir-cfk"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VMl-IV-ckA">
+                                <rect key="frame" x="139" y="249" width="162.99999999999997" height="34.333333333333371"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="gray" title="Game Instructions"/>
+                                <connections>
+                                    <action selector="inforTapped:" destination="nF2-Of-39h" eventType="touchUpInside" id="nQu-HN-kbe"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="wordWrap" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8Lf-T0-cEK">
+                                <rect key="frame" x="20" y="700" width="400" height="173"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <accessibility key="accessibilityConfiguration">
+                                    <accessibilityTraits key="traits" button="YES" image="YES"/>
+                                </accessibility>
                                 <color key="tintColor" systemColor="labelColor"/>
                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                 <state key="normal" title="Cards against Longhorns" backgroundImage="cardsAgainstLonghorns">
@@ -270,74 +311,9 @@
                                     <action selector="cardsAgainstLonghornsTapped:" destination="nF2-Of-39h" eventType="touchUpInside" id="Psq-Z7-5p9"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1w6-ae-N4p">
-                                <rect key="frame" x="20" y="529" width="400" height="156"/>
-                                <accessibility key="accessibilityConfiguration">
-                                    <accessibilityTraits key="traits" button="YES" image="YES"/>
-                                </accessibility>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="156" id="3Kt-2f-W7s"/>
-                                    <constraint firstAttribute="width" constant="400" id="a18-mh-dWq"/>
-                                </constraints>
-                                <color key="tintColor" systemColor="labelColor"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="tinted" title="Imposter">
-                                    <backgroundConfiguration key="background" image="imposter"/>
-                                    <fontDescription key="titleFontDescription" name="HoeflerText-Regular" family="Hoefler Text" pointSize="50"/>
-                                    <color key="baseForegroundColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                    <color key="baseBackgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                </buttonConfiguration>
-                                <connections>
-                                    <action selector="imposterTapped:" destination="nF2-Of-39h" eventType="touchUpInside" id="nPa-Tr-lei"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Yvp-Hs-Yzm">
-                                <rect key="frame" x="20" y="365" width="400" height="156"/>
-                                <accessibility key="accessibilityConfiguration">
-                                    <accessibilityTraits key="traits" button="YES" image="YES"/>
-                                </accessibility>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="156" id="Mu4-YT-LBf"/>
-                                    <constraint firstAttribute="width" constant="400" id="fK9-2V-KXZ"/>
-                                </constraints>
-                                <color key="tintColor" systemColor="labelColor"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="tinted" title="Drink or Dare">
-                                    <backgroundConfiguration key="background" image="drinkordare"/>
-                                    <fontDescription key="titleFontDescription" name="HoeflerText-Regular" family="Hoefler Text" pointSize="50"/>
-                                    <color key="baseForegroundColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                    <color key="baseBackgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                </buttonConfiguration>
-                                <connections>
-                                    <action selector="drinkOrDareTapped:" destination="nF2-Of-39h" eventType="touchUpInside" id="9oW-Ir-cfk"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VMl-IV-ckA">
-                                <rect key="frame" x="138.66666666666666" y="308" width="162.99999999999997" height="35"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="gray" title="Game Instructions"/>
-                                <connections>
-                                    <action selector="inforTapped:" destination="nF2-Of-39h" eventType="touchUpInside" id="nQu-HN-kbe"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Hb1-7c-I4N"/>
                         <color key="backgroundColor" red="0.79997003079999995" green="0.40556967259999999" blue="0.1448230445" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <constraints>
-                            <constraint firstItem="VMl-IV-ckA" firstAttribute="centerX" secondItem="Hb1-7c-I4N" secondAttribute="centerX" id="8m6-vZ-Wjx"/>
-                            <constraint firstItem="Yvp-Hs-Yzm" firstAttribute="top" secondItem="VMl-IV-ckA" secondAttribute="bottom" constant="22" id="HSv-65-RxG"/>
-                            <constraint firstItem="VMl-IV-ckA" firstAttribute="top" secondItem="Hb1-7c-I4N" secondAttribute="top" constant="130" id="Jnn-vV-fjr"/>
-                            <constraint firstItem="Hb1-7c-I4N" firstAttribute="trailing" secondItem="1w6-ae-N4p" secondAttribute="trailing" constant="20" id="Mxy-08-wOl"/>
-                            <constraint firstItem="1w6-ae-N4p" firstAttribute="top" secondItem="Yvp-Hs-Yzm" secondAttribute="bottom" constant="8" symbolic="YES" id="NGs-OK-hea"/>
-                            <constraint firstItem="Yvp-Hs-Yzm" firstAttribute="leading" secondItem="Hb1-7c-I4N" secondAttribute="leading" constant="20" id="O7d-95-ARp"/>
-                            <constraint firstItem="Yvp-Hs-Yzm" firstAttribute="top" secondItem="Hb1-7c-I4N" secondAttribute="top" constant="187" id="Pas-ce-0Gh"/>
-                            <constraint firstItem="Hb1-7c-I4N" firstAttribute="trailing" secondItem="Yvp-Hs-Yzm" secondAttribute="trailing" constant="20" id="RxZ-Cd-qAR"/>
-                            <constraint firstItem="Hb1-7c-I4N" firstAttribute="bottom" secondItem="8Lf-T0-cEK" secondAttribute="bottom" constant="17" id="XJU-Ic-5d7"/>
-                            <constraint firstItem="8Lf-T0-cEK" firstAttribute="top" secondItem="1w6-ae-N4p" secondAttribute="bottom" constant="12" id="YLr-mW-req"/>
-                            <constraint firstItem="1w6-ae-N4p" firstAttribute="leading" secondItem="Hb1-7c-I4N" secondAttribute="leading" constant="20" id="ZZ1-fo-eWz"/>
-                            <constraint firstItem="8Lf-T0-cEK" firstAttribute="leading" secondItem="Hb1-7c-I4N" secondAttribute="leading" constant="20" id="d4m-R1-Mg3"/>
-                            <constraint firstItem="Hb1-7c-I4N" firstAttribute="trailing" secondItem="8Lf-T0-cEK" secondAttribute="trailing" constant="20" id="rDc-4F-0c4"/>
-                        </constraints>
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="jSr-Ax-wSB"/>
@@ -1012,7 +988,7 @@
                                 </connections>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9Oe-HN-OUO">
-                                <rect key="frame" x="30" y="304" width="380" height="250"/>
+                                <rect key="frame" x="30" y="304" width="380" height="178"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="WORD" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Oil-ix-zvD">
                                         <rect key="frame" x="70" y="100" width="250" height="37"/>
@@ -1071,7 +1047,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="ajM-PW-Ld6">
-                                <rect key="frame" x="100" y="627" width="240" height="128"/>
+                                <rect key="frame" x="100" y="555" width="240" height="200"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="240" id="IKa-Wt-uLf"/>
@@ -1117,7 +1093,7 @@
         <!--Lobby View Controller-->
         <scene sceneID="3wN-gu-sh5">
             <objects>
-                <viewController storyboardIdentifier="CardsAgainstLonghornsLobbyViewController" title="Lobby View Controller" id="pS9-et-kqh" customClass="CardsAgainstLonghornsLobbyViewController" customModule="Bevoholic" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="CALLobbyVC" title="Lobby View Controller" id="pS9-et-kqh" customClass="CALLobbyVC" customModule="Bevoholic" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Fxz-Uz-WDV">
                         <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1224,12 +1200,12 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Vex-tV-8SM" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="828" y="931"/>
+            <point key="canvasLocation" x="345" y="941"/>
         </scene>
-        <!--Cards Against Longhorns View Controller-->
+        <!--View Controller-->
         <scene sceneID="9pz-Rs-sUO">
             <objects>
-                <viewController storyboardIdentifier="CardsAgainstLonghornsViewController" id="dbJ-me-gzt" customClass="CardsAgainstLonghornsViewController" customModule="Bevoholic" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="CALViewController" id="dbJ-me-gzt" customClass="CALViewController" customModule="Bevoholic" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="mWj-1a-p8e">
                         <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1328,19 +1304,19 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="calPromptLabel" destination="zu8-wH-AJB" id="aN4-4D-g5i"/>
-                        <outlet property="calTitleLabel" destination="PYb-OX-aMW" id="78f-gv-H2u"/>
-                        <outlet property="uploadButton" destination="qRb-yP-Juj" id="jtf-2F-ZZm"/>
+                        <outlet property="calPromptLabel" destination="zu8-wH-AJB" id="HDW-to-fKL"/>
+                        <outlet property="calTitleLabel" destination="PYb-OX-aMW" id="4kj-7B-HoL"/>
+                        <outlet property="uploadButton" destination="qRb-yP-Juj" id="Ak7-ev-nUs"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gcb-OV-jdB" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1600.909090909091" y="930.75313807531381"/>
+            <point key="canvasLocation" x="980" y="941"/>
         </scene>
-        <!--Cards Against Longhorns Voting View Controller-->
+        <!--VotingVC-->
         <scene sceneID="ipb-1o-Lw0">
             <objects>
-                <viewController storyboardIdentifier="CardsAgainstLonghornsVotingViewController" id="aDy-Ke-7Zm" customClass="CardsAgainstLonghornsVotingViewController" customModule="Bevoholic" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="CALVotingVC" id="aDy-Ke-7Zm" customClass="CALVotingVC" customModule="Bevoholic" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="1qh-9N-HVx">
                         <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1406,9 +1382,16 @@
                                 <connections>
                                     <action selector="completePressed:" destination="kx2-3X-pLE" eventType="touchUpInside" id="IpN-3Z-OYA"/>
                                     <action selector="submitPressed:" destination="dbJ-me-gzt" eventType="touchUpInside" id="uTJ-F0-lDS"/>
-                                    <action selector="submitVotePressed:" destination="aDy-Ke-7Zm" eventType="touchUpInside" id="Qb8-HX-EZq"/>
+                                    <action selector="submitVotePressed:" destination="aDy-Ke-7Zm" eventType="touchUpInside" id="3eU-zN-pUw"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Vote Submitted!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gIW-p8-rkY">
+                                <rect key="frame" x="158" y="837" width="123" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="hw7-Xi-ZHQ"/>
                         <color key="backgroundColor" red="0.80000000000000004" green="0.40556967259999999" blue="0.1448230445" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -1427,13 +1410,14 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="submitVoteButton" destination="kHA-ZJ-9ve" id="4a9-vf-npy"/>
-                        <outlet property="tableView" destination="h8h-1F-AKt" id="sPU-N3-cl3"/>
+                        <outlet property="submitVoteButton" destination="kHA-ZJ-9ve" id="ZcF-KM-G8g"/>
+                        <outlet property="tableView" destination="h8h-1F-AKt" id="GwZ-JU-kKc"/>
+                        <outlet property="voteSubmittedLabel" destination="gIW-p8-rkY" id="onn-Up-VPp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Qsc-gD-e8r" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2246" y="932"/>
+            <point key="canvasLocation" x="1613" y="941"/>
         </scene>
         <!--GameInfoVC-->
         <scene sceneID="TLu-cj-77e">
@@ -1445,7 +1429,7 @@
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" lineBreakMode="wordWrap" numberOfLines="32" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rVB-BL-uq3">
                                 <rect key="frame" x="20" y="219" width="400" height="179.33333333333337"/>
-                                <mutableString key="text">In Drink or Dare, players take turns completing fun, UT-themed dares chosen by the game host based on location categories like West Compus, On Campus, or Kickback (no location based dares). When it's your turn, you must either complete the dare and submit a photo as proof to earn points or choose to pass and accept the listed penalty. At the end of the round, points are tallied on the leaderboard and the player with the highest score wins while everyone walks away with a montage of memories from the night :)</mutableString>
+                                <string key="text">In Drink or Dare, players take turns completing fun, UT-themed dares chosen by the game host based on location categories like West Compus, On Campus, or Kickback (no location based dares). When it's your turn, you must either complete the dare and submit a photo as proof to earn points or choose to pass and accept the listed penalty. At the end of the round, points are tallied on the leaderboard and the player with the highest score wins while everyone walks away with a montage of memories from the night :)</string>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -1561,6 +1545,133 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SKN-W1-aYK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="456.81818181818187" y="-1095.1882845188286"/>
+        </scene>
+        <!--Winner View Controller-->
+        <scene sceneID="k9k-dq-hTb">
+            <objects>
+                <viewController storyboardIdentifier="CALWinnerVC" title="Winner View Controller" id="eiI-y9-16z" customClass="CALWinnerVC" customModule="Bevoholic" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="AZt-h9-Grb">
+                        <rect key="frame" x="0.0" y="0.0" width="440" height="956"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Bzc-55-OjJ">
+                                <rect key="frame" x="0.0" y="391" width="440" height="444"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="487" id="2Sq-Q7-85I"/>
+                                </constraints>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="WinnerCell" rowHeight="246" id="jf7-Vc-fjH" customClass="WinnerCell" customModule="Bevoholic" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="50" width="440" height="246"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="jf7-Vc-fjH" id="NFK-do-n5s">
+                                            <rect key="frame" x="0.0" y="0.0" width="440" height="246"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="person.crop.circle.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="QK1-Pd-rXJ" customClass="PlayerProfile" customModule="Bevoholic" customModuleProvider="target">
+                                                    <rect key="frame" x="20" y="41" width="157" height="106"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="50" id="9ee-9G-R80"/>
+                                                        <constraint firstAttribute="width" constant="50" id="gLU-VW-DrW"/>
+                                                    </constraints>
+                                                </imageView>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Username" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P1A-we-2Lz">
+                                                    <rect key="frame" x="20" y="132" width="157" height="66"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" restorationIdentifier="submittedImageView" translatesAutoresizingMaskIntoConstraints="NO" id="sea-m6-xJY">
+                                                    <rect key="frame" x="185" y="15" width="235" height="203"/>
+                                                </imageView>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="sea-m6-xJY" firstAttribute="leading" secondItem="P1A-we-2Lz" secondAttribute="trailing" constant="8" symbolic="YES" id="4mN-kt-Z5d"/>
+                                                <constraint firstItem="QK1-Pd-rXJ" firstAttribute="leading" secondItem="NFK-do-n5s" secondAttribute="leading" constant="20" id="O3H-ma-ylI"/>
+                                                <constraint firstAttribute="bottom" secondItem="sea-m6-xJY" secondAttribute="bottom" constant="6" id="OSv-Qx-Lpb"/>
+                                                <constraint firstAttribute="trailing" secondItem="sea-m6-xJY" secondAttribute="trailing" constant="20" symbolic="YES" id="Uqs-XY-CIP"/>
+                                                <constraint firstItem="P1A-we-2Lz" firstAttribute="leading" secondItem="QK1-Pd-rXJ" secondAttribute="trailing" constant="20" id="gqM-G8-wmk"/>
+                                                <constraint firstItem="sea-m6-xJY" firstAttribute="leading" secondItem="QK1-Pd-rXJ" secondAttribute="trailing" constant="28" id="i5e-DL-EkA"/>
+                                                <constraint firstAttribute="trailing" secondItem="P1A-we-2Lz" secondAttribute="trailing" constant="20" id="iXk-65-gUF"/>
+                                                <constraint firstItem="sea-m6-xJY" firstAttribute="top" secondItem="NFK-do-n5s" secondAttribute="top" constant="15" id="rmr-Cn-urU"/>
+                                                <constraint firstItem="QK1-Pd-rXJ" firstAttribute="centerY" secondItem="NFK-do-n5s" secondAttribute="centerY" id="uDm-CP-Y9i"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="tintColor" systemColor="systemOrangeColor"/>
+                                        <connections>
+                                            <outlet property="avatarImageView" destination="QK1-Pd-rXJ" id="CIK-OE-doL"/>
+                                            <outlet property="submittedImageView" destination="sea-m6-xJY" id="xc3-ar-N73"/>
+                                            <outlet property="usernameLabel" destination="P1A-we-2Lz" id="yKw-U1-VJa"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="eiI-y9-16z" id="d99-Ca-mI3"/>
+                                    <outlet property="delegate" destination="eiI-y9-16z" id="YTy-Oq-96c"/>
+                                </connections>
+                            </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gc5-AC-sO0">
+                                <rect key="frame" x="68" y="853.66666666666652" width="304" height="34.333333333333371"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" relation="lessThanOrEqual" constant="50" id="uI8-1D-ipR"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="filled" title="Start New Round" cornerStyle="capsule">
+                                    <color key="baseBackgroundColor" systemColor="systemGreenColor"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="startNewRoundPressed:" destination="eiI-y9-16z" eventType="touchUpInside" id="Zbg-eh-wgS"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Cards against Longhorns" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jsn-wH-AXi">
+                                <rect key="frame" x="62.333333333333343" y="214" width="315.33333333333326" height="30"/>
+                                <fontDescription key="fontDescription" name="HoeflerText-Regular" family="Hoefler Text" pointSize="30"/>
+                                <color key="textColor" red="0.4696062184" green="0.19726714519999999" blue="0.002058247878" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="WINNER" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zc0-jA-ebL">
+                                <rect key="frame" x="113" y="252" width="213" height="59"/>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="44"/>
+                                <color key="textColor" systemColor="systemGreenColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="LOSERS: take a shot or a sip!" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="7" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JGL-84-xLp">
+                                <rect key="frame" x="62" y="304" width="316" height="79"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Bax-xa-UA3"/>
+                        <color key="backgroundColor" red="0.79997003079999995" green="0.40556967259999999" blue="0.1448230445" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="Zc0-jA-ebL" firstAttribute="centerX" secondItem="AZt-h9-Grb" secondAttribute="centerX" id="0bc-3S-uNi"/>
+                            <constraint firstItem="Gc5-AC-sO0" firstAttribute="top" secondItem="Bzc-55-OjJ" secondAttribute="bottom" constant="10" id="4lk-x6-1C9"/>
+                            <constraint firstItem="Gc5-AC-sO0" firstAttribute="leading" secondItem="Bax-xa-UA3" secondAttribute="leading" constant="68" id="BrM-ve-bts"/>
+                            <constraint firstItem="JGL-84-xLp" firstAttribute="leading" secondItem="Bax-xa-UA3" secondAttribute="leading" constant="62" id="DMo-Yc-qlK"/>
+                            <constraint firstItem="Jsn-wH-AXi" firstAttribute="top" secondItem="Bax-xa-UA3" secondAttribute="top" constant="90" id="EU1-sg-vph"/>
+                            <constraint firstItem="Gc5-AC-sO0" firstAttribute="centerX" secondItem="AZt-h9-Grb" secondAttribute="centerX" id="FHJ-eC-L4B"/>
+                            <constraint firstItem="Bax-xa-UA3" firstAttribute="trailing" secondItem="JGL-84-xLp" secondAttribute="trailing" constant="62" id="JTb-yM-B9l"/>
+                            <constraint firstAttribute="trailing" secondItem="Bzc-55-OjJ" secondAttribute="trailing" id="MUc-9G-nXT"/>
+                            <constraint firstItem="Bax-xa-UA3" firstAttribute="trailing" secondItem="Gc5-AC-sO0" secondAttribute="trailing" constant="68" id="OAN-N8-iUg"/>
+                            <constraint firstItem="Jsn-wH-AXi" firstAttribute="centerX" secondItem="AZt-h9-Grb" secondAttribute="centerX" id="PuR-PN-Tuw"/>
+                            <constraint firstItem="JGL-84-xLp" firstAttribute="top" secondItem="Zc0-jA-ebL" secondAttribute="bottom" constant="21" id="Sqj-K0-JdN"/>
+                            <constraint firstItem="Bzc-55-OjJ" firstAttribute="top" secondItem="JGL-84-xLp" secondAttribute="bottom" constant="40" id="a51-bA-fld"/>
+                            <constraint firstItem="Zc0-jA-ebL" firstAttribute="top" secondItem="Jsn-wH-AXi" secondAttribute="bottom" constant="8" symbolic="YES" id="aE6-Mi-p8w"/>
+                            <constraint firstItem="Bzc-55-OjJ" firstAttribute="leading" secondItem="AZt-h9-Grb" secondAttribute="leading" id="h68-cU-4dx"/>
+                            <constraint firstItem="Gc5-AC-sO0" firstAttribute="bottom" secondItem="Bax-xa-UA3" secondAttribute="bottom" id="qPA-ya-o52"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="Cj7-lK-isU"/>
+                    <connections>
+                        <outlet property="newRoundButton" destination="Gc5-AC-sO0" id="jfK-td-P5k"/>
+                        <outlet property="tableView" destination="Bzc-55-OjJ" id="doe-iZ-jIA"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="WDC-yU-LTo" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2245.909090909091" y="940.79497907949792"/>
         </scene>
     </scenes>
     <resources>

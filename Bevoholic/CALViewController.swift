@@ -1,9 +1,11 @@
+//based on drink or dare and imposter view controllers
+
 import UIKit
 import PhotosUI
 import FirebaseAuth
 import FirebaseFirestore
 
-class CardsAgainstLonghornsViewController: HeaderViewController, PHPickerViewControllerDelegate {
+class CALViewController: HeaderViewController, PHPickerViewControllerDelegate {
     
     @IBOutlet weak var calTitleLabel: UILabel!
     @IBOutlet weak var calPromptLabel: UILabel!
@@ -12,30 +14,33 @@ class CardsAgainstLonghornsViewController: HeaderViewController, PHPickerViewCon
     var gameCode: String!
     var selectedImage: UIImage?
     private let db = Firestore.firestore()
-    
-    let calPrompts: [String] = [
-        "When you see an org giving out free food on campus…",
-        "When your friend says 'Let’s skip class'…",
-        "When you realize your group project is due tomorrow…",
-        "When someone steals your favorite spot in the library…",
-        "When it’s 2 AM and you just remembered your homework…",
-        "When the RA says 'Quiet hours start now'…",
-        "When you see someone eating your leftovers…",
-        "When the professor says the exam is cumulative…",
-        "When it’s Taco Tuesday and you see the line at the food truck…",
-        "When you finally get your grade back and it’s better than expected…"
-    ]
+    var promptListener: ListenerRegistration?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.hidesBackButton = true
-        setRandomPrompt()
+        fetchSyncedPrompt()
         setUploadIconSize()
         addDashedBorder()
     }
     
-    func setRandomPrompt() {
-        calPromptLabel.text = calPrompts.randomElement() ?? "Be creative!"
+    func fetchSyncedPrompt() {
+        guard let gameCode = gameCode else {
+            return
+        }
+        
+        promptListener = db.collection("games").document(gameCode).addSnapshotListener { snapshot, error in
+            if let data = snapshot?.data(), let prompt = data["currentPrompt"] as? String {
+                DispatchQueue.main.async {
+                    self.calPromptLabel.text = prompt
+                }
+            }
+            else {
+                DispatchQueue.main.async {
+                    self.calPromptLabel.text = "Waiting for prompt..."
+                }
+            }
+        }
     }
     
     func addDashedBorder() {
@@ -74,11 +79,15 @@ class CardsAgainstLonghornsViewController: HeaderViewController, PHPickerViewCon
     
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         dismiss(animated: true)
-        guard let provider = results.first?.itemProvider, provider.canLoadObject(ofClass: UIImage.self) else { return }
+        guard let provider = results.first?.itemProvider, provider.canLoadObject(ofClass: UIImage.self) else {
+            return
+        }
         
         provider.loadObject(ofClass: UIImage.self) { image, _ in
             DispatchQueue.main.async {
-                guard let selected = image as? UIImage else { return }
+                guard let selected = image as? UIImage else {
+                    return
+                }
                 self.selectedImage = self.resizeImage(selected, targetSize: CGSize(width: 400, height: 400))
                 self.updateUploadButtonPreview()
             }
@@ -93,52 +102,80 @@ class CardsAgainstLonghornsViewController: HeaderViewController, PHPickerViewCon
     }
     
     func updateUploadButtonPreview() {
-        guard let image = selectedImage else { return }
+        guard let image = selectedImage else {
+            return
+        }
         let preview = image.preparingThumbnail(of: CGSize(width: 50, height: 50))
         var config = uploadButton.configuration
         config?.image = preview
         uploadButton.configuration = config
     }
     
-    @IBAction func submitPressed(_ sender: UIButton){
+    @IBAction func submitPressed(_ sender: UIButton) {
         guard let image = selectedImage, let gameCode = gameCode else {
-            print("No image selected or game code missing")
             return
         }
-        guard let userId = Auth.auth().currentUser?.uid else { return }
+        guard let userId = Auth.auth().currentUser?.uid else {
+            return
+        }
         
         sender.isEnabled = false
         
-        guard let imageData = image.jpegData(compressionQuality: 0.3) else { return }
+        guard let imageData = image.jpegData(compressionQuality: 0.3) else {
+            sender.isEnabled = true
+            return
+        }
         let base64String = imageData.base64EncodedString()
         
         let gameRef = db.collection("games").document(gameCode)
         
-        gameRef.collection("submissions").document(userId).setData([
+        let submissionData: [String: Any] = [
             "image": base64String,
             "submittedAt": Timestamp(),
             "userId": userId
-        ]) { error in
-            if let error = error {
-                print("Error uploading submission: \(error.localizedDescription)")
+        ]
+        
+        gameRef.collection("submissions").document(userId).setData(submissionData) { error in
+            if error != nil {
                 sender.isEnabled = true
                 return
             }
-
-            gameRef.updateData(["gameState": "submitting"]) { error in
-                if let error = error {
-                    print("Error updating game state: \(error.localizedDescription)")
+            
+            gameRef.getDocument { (document, error) in
+                if let document = document, let data = document.data() {
+                    let totalPlayers = (data["playerOrder"] as? [String])?.count ?? 0
+                    
+                    gameRef.collection("submissions").getDocuments { (snapshot, error) in
+                        let submissionCount = snapshot?.documents.count ?? 0
+                        
+                        if submissionCount >= totalPlayers && totalPlayers > 0 {
+                            gameRef.updateData(["gameState": "voting"])
+                        } else {
+                            gameRef.updateData(["gameState": "submitting"])
+                        }
+                        
+                        DispatchQueue.main.async {
+                            self.selectedImage = nil
+                            self.setUploadIconSize()
+                            sender.isEnabled = true
+                            self.showWaitingScreen()
+                        }
+                    }
                 }
-                
-                self.showWaitingScreen()
             }
         }
     }
     
     func showWaitingScreen() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let waitingVC = storyboard.instantiateViewController(withIdentifier: "WaitingViewController") as? WaitingViewController else { return }
+        guard let waitingVC = storyboard.instantiateViewController(withIdentifier: "WaitingViewController") as? WaitingViewController else {
+            return
+        }
         waitingVC.gameCode = gameCode
         navigationController?.pushViewController(waitingVC, animated: true)
+    }
+    
+    deinit {
+        promptListener?.remove()
     }
 }

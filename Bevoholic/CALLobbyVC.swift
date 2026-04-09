@@ -1,8 +1,10 @@
+//copy of drink or dare lobby code
+
 import UIKit
 import FirebaseAuth
 import FirebaseFirestore
 
-class CardsAgainstLonghornsLobbyViewController: HeaderViewController, UITableViewDelegate, UITableViewDataSource {
+class CALLobbyVC: HeaderViewController, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var gameCodeLabel: UILabel!
@@ -28,17 +30,22 @@ class CardsAgainstLonghornsLobbyViewController: HeaderViewController, UITableVie
     }
 
     func fetchPlayers() {
-        guard let gameCode = gameCode else { return }
+        guard let gameCode = gameCode else {
+            return
+        }
+        
         playersListener = db.collection("games")
             .document(gameCode)
             .collection("players")
             .addSnapshotListener { snapshot, error in
                 if let error = error {
-                    print("Error fetching players: \(error.localizedDescription)")
                     return
                 }
 
-                guard let documents = snapshot?.documents else { return }
+                guard let documents = snapshot?.documents else {
+                    return
+                }
+                
                 let sortedDocuments = documents.sorted {
                     let lhsTimestamp = ($0.data()["joinedAt"] as? Timestamp)?.dateValue() ?? .distantPast
                     let rhsTimestamp = ($1.data()["joinedAt"] as? Timestamp)?.dateValue() ?? .distantPast
@@ -50,7 +57,9 @@ class CardsAgainstLonghornsLobbyViewController: HeaderViewController, UITableVie
                     let name = data["name"] as? String ?? "Player"
                     return (id: doc.documentID, name: name)
                 }
+                
                 self.usernames = self.players.map { $0.name }
+                
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                 }
@@ -58,13 +67,18 @@ class CardsAgainstLonghornsLobbyViewController: HeaderViewController, UITableVie
     }
 
     func observeGameState() {
-        guard let gameCode = gameCode else { return }
+        guard let gameCode = gameCode else {
+            return
+        }
+        
         gameListener = db.collection("games")
             .document(gameCode)
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
+                guard let self = self else {
+                    return
+                }
+                
                 if let error = error {
-                    print("Error observing game state: \(error.localizedDescription)")
                     return
                 }
 
@@ -72,26 +86,41 @@ class CardsAgainstLonghornsLobbyViewController: HeaderViewController, UITableVie
                     let data = snapshot?.data(),
                     let gameState = data["gameState"] as? String,
                     gameState == "inProgress"
-                else { return }
+                else {
+                    return
+                }
 
                 self.routeToPromptScreen()
             }
     }
 
     func routeToPromptScreen() {
-        guard !hasRoutedToGameScreen else { return }
+        guard !hasRoutedToGameScreen else {
+            return
+        }
+        
         hasRoutedToGameScreen = true
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        guard let promptVC = storyboard.instantiateViewController(withIdentifier: "CardsAgainstLonghornsViewController") as? CardsAgainstLonghornsViewController else { return }
+        
+        guard let promptVC = storyboard.instantiateViewController(withIdentifier: "CALViewController") as? CALViewController else {
+            return
+        }
+        
         promptVC.gameCode = gameCode
         navigationController?.pushViewController(promptVC, animated: true)
     }
 
     @IBAction func startButtonPressed(_ sender: Any) {
-        guard let gameCode = gameCode, !players.isEmpty else { return }
+        guard let gameCode = gameCode, !players.isEmpty else {
+            return
+        }
+            
         let firstPlayer = players[0]
+        let selectedPrompt = GameState.getNextPrompt()
+            
         db.collection("games").document(gameCode).setData([
             "gameState": "inProgress",
+            "currentPrompt": selectedPrompt,
             "playerOrder": players.map { $0.id },
             "currentTurnIndex": 0,
             "currentPlayerId": firstPlayer.id,
@@ -99,7 +128,7 @@ class CardsAgainstLonghornsLobbyViewController: HeaderViewController, UITableVie
             "turnsPlayed": 0
         ], merge: true) { error in
             if let error = error {
-                print("Error starting CAL game: \(error.localizedDescription)")
+                return
             }
         }
     }
