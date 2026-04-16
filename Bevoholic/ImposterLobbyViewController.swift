@@ -91,11 +91,11 @@ class ImposterLobbyViewController: HeaderViewController, UITableViewDelegate, UI
 
     @IBAction func startButtonPressed(_ sender: Any) {
         guard let gameCode = gameCode else { return }
-    
-//        guard players.count >= 3 else {
-//            showAlert(title: "Need More Players", message: "Imposter needs at least 3 players to start.")
-//            return
-//        }
+
+        guard players.count >= 3 else {
+            showAlert(title: "Need More Players", message: "Imposter needs at least 3 players to start.")
+            return
+        }
 
         guard let currentUserId = Auth.auth().currentUser?.uid else { return }
 
@@ -106,7 +106,7 @@ class ImposterLobbyViewController: HeaderViewController, UITableViewDelegate, UI
                 return
             }
 
-            let activePlayerIds = ["1", "2", "3"]
+            let activePlayerIds = self.players.map { $0.id }
             let imposterId = activePlayerIds.randomElement() ?? activePlayerIds[0]
             let speakerOrder = activePlayerIds.shuffled()
             let randomContent = ImposterGameManager.shared.randomCategoryAndWord()
@@ -119,6 +119,10 @@ class ImposterLobbyViewController: HeaderViewController, UITableViewDelegate, UI
                 "imposterId": imposterId,
                 "activePlayerIds": activePlayerIds,
                 "eliminatedPlayerIds": [],
+                "clueReadyPlayerIds": [],
+                "imposterVotes": [:],
+                "roundTopSuspectIds": [],
+                "roundVoteCounts": [:],
                 "speakerOrder": speakerOrder,
                 "currentPlayerId": speakerOrder[0],
                 "roundNumber": 1,
