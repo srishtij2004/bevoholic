@@ -194,18 +194,27 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     }
 
     func addDashedBorder() {
-        let dashedBorder = CAShapeLayer()
-        dashedBorder.strokeColor = UIColor.black.cgColor
-        dashedBorder.lineDashPattern = [6, 4]
-        dashedBorder.fillColor = nil
-        dashedBorder.frame = uploadButton.bounds
+        uploadButton.layer.sublayers?.removeAll(where: { $0.name == "uploadDashedBorder" })
 
-        dashedBorder.path = UIBezierPath(
-            roundedRect: uploadButton.bounds,
-            cornerRadius: 20
-        ).cgPath
+            let dashedBorder = CAShapeLayer()
+            dashedBorder.name = "uploadDashedBorder"
+            dashedBorder.strokeColor = UIColor.black.cgColor
+            dashedBorder.lineDashPattern = [6, 4]
+            dashedBorder.fillColor = UIColor.clear.cgColor
+            dashedBorder.lineWidth = 2
+            dashedBorder.frame = uploadButton.bounds
 
-        uploadButton.layer.addSublayer(dashedBorder)
+            dashedBorder.path = UIBezierPath(
+                roundedRect: uploadButton.bounds.insetBy(dx: 2, dy: 2),
+                cornerRadius: uploadButton.layer.cornerRadius
+            ).cgPath
+
+            uploadButton.layer.addSublayer(dashedBorder)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        addDashedBorder()
     }
 
     func setUploadIconSize() {
