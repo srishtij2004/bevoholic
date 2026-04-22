@@ -6,200 +6,186 @@
 //
 
 import UIKit
-import FirebaseAuth
 import FirebaseFirestore
 
-class CALWinnerVC: HeaderViewController, UITableViewDelegate, UITableViewDataSource {
+class CALWinnerVC: HeaderViewController {
 
-    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var winnerCardView: UIView!
+    @IBOutlet weak var avatarImageView: UIImageView!
+    @IBOutlet weak var usernameLabel: UILabel!
+    @IBOutlet weak var winnerMessageLabel: UILabel!
     @IBOutlet weak var newRoundButton: UIButton!
+
+    @IBOutlet weak var winnerMessageView: UIView!
     
     var gameCode: String!
+
     private let db = Firestore.firestore()
     private var stateListener: ListenerRegistration?
     private var hasRoutedToPrompt = false
-    
-    var winners: [(username: String, avatar: String)] = []
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
+
         navigationItem.hidesBackButton = true
-        
-        newRoundButton.isHidden = false
-        
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.rowHeight = 200
-        
-        calculateWinners()
+
+        styleUI()
+        calculateWinner()
         listenForNewRound()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         hasRoutedToPrompt = false
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         stateListener?.remove()
     }
-    
-    //in case of a tie, display all winners
-    func calculateWinners() {
-        guard let gameCode = gameCode else { return }
-        
-        db.collection("games").document(gameCode).collection("votes").getDocuments { snapshot, error in
-            guard let documents = snapshot?.documents, !documents.isEmpty else { return }
-            
-            var maxVotes = 0
-            for doc in documents {
-                let votes = doc.data()["votes"] as? Int ?? 0
-                if votes > maxVotes {
-                    maxVotes = votes
-                }
-            }
-            
-            var winningUserIds: [String] = []
-            for doc in documents {
-                let votes = doc.data()["votes"] as? Int ?? 0
-                if votes == maxVotes {
-                    winningUserIds.append(doc.documentID)
-                }
-            }
-            
-            self.fetchWinnerDetails(userIds: winningUserIds)
-        }
+
+    func styleUI() {
+        winnerCardView.layer.cornerRadius = 20
+        winnerCardView.clipsToBounds = true
+        winnerMessageView.layer.cornerRadius = 20
+        winnerMessageView.clipsToBounds = true
+        avatarImageView.layer.cornerRadius = avatarImageView.frame.width / 2
+        avatarImageView.clipsToBounds = true
+
+        newRoundButton.layer.cornerRadius = 18
     }
-    
-    //get from AvatarCell class
-    func fetchWinnerDetails(userIds: [String]) {
-        let group = DispatchGroup()
-        var fetchedWinners: [(username: String, avatar: String)] = []
-        
-        for userId in userIds {
-            group.enter()
-            var username = "Player"
-            var avatar = "longhornHead"
-            
-            db.collection("games").document(self.gameCode).collection("players").document(userId).getDocument { playerSnap, _ in
-                if let playerData = playerSnap?.data() {
-                    if let name = playerData["name"] as? String {
-                        username = name
-                    } else if let name = playerData["username"] as? String {
-                        username = name
+
+    func calculateWinner() {
+        guard let gameCode = gameCode else { return }
+
+        db.collection("games")
+            .document(gameCode)
+            .collection("votes")
+            .getDocuments { snapshot, error in
+
+                guard let docs = snapshot?.documents,
+                      !docs.isEmpty else { return }
+
+                var maxVotes = 0
+                var winnerId = ""
+
+                for doc in docs {
+                    let votes = doc.data()["votes"] as? Int ?? 0
+
+                    if votes > maxVotes {
+                        maxVotes = votes
+                        winnerId = doc.documentID
                     }
                 }
-                
-                self.db.collection("users").document(userId).getDocument { userSnap, _ in
-                    if let userData = userSnap?.data() {
-                        avatar = userData["selectedAvatar"] as? String ?? "longhornHead"
-                        if username == "Player" {
-                            if let name = userData["name"] as? String {
-                                username = name
-                            } else if let name = userData["username"] as? String {
-                                username = name
-                            }
+
+                self.loadWinnerDetails(userId: winnerId)
+            }
+    }
+
+    func loadWinnerDetails(userId: String) {
+
+        var username = "@player"
+        var avatarName = "longhornHead"
+
+        db.collection("games")
+            .document(gameCode)
+            .collection("players")
+            .document(userId)
+            .getDocument { snap, error in
+
+                if let data = snap?.data() {
+                    username = data["name"] as? String ??
+                               data["username"] as? String ??
+                               "@player"
+                }
+
+                self.db.collection("users")
+                    .document(userId)
+                    .getDocument { userSnap, error in
+
+                        if let data = userSnap?.data() {
+                            avatarName = data["selectedAvatar"] as? String ?? "longhornHead"
+                        }
+
+                        DispatchQueue.main.async {
+
+                            self.usernameLabel.text = "@\(username)"
+                            self.avatarImageView.image = UIImage(named: avatarName)
+
+                            self.winnerMessageLabel.text =
+                            "@\(username) wins!\nEveryone else bottoms up!"
                         }
                     }
-                    
-                    fetchedWinners.append((username: username, avatar: avatar))
-                    group.leave()
-                }
             }
-        }
-        
-        group.notify(queue: .main) {
-            self.winners = fetchedWinners
-            self.tableView.reloadData()
-        }
     }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return winners.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "WinnerCell", for: indexPath) as! WinnerCell
-        let winner = winners[indexPath.row]
-        
-        cell.usernameLabel.text = winner.username
-        cell.avatarImageView.image = UIImage(named: winner.avatar)
-        
-        return cell
-    }
-    
+
     func listenForNewRound() {
         guard let gameCode = gameCode else { return }
-        
-        stateListener = db.collection("games").document(gameCode).addSnapshotListener { [weak self] snapshot, error in
-            guard let self = self else { return }
-            if let error = error { return }
-            
-            guard
-                !self.hasRoutedToPrompt,
-                let data = snapshot?.data(),
-                let gameState = data["gameState"] as? String,
-                gameState == "inProgress"
-            else { return }
-            
-            self.hasRoutedToPrompt = true
-            self.routeBackToPromptScreen()
-        }
-    }
-    
-    @IBAction func startNewRoundPressed(_ sender: UIButton) {
-        guard let gameCode = gameCode else { return }
-        
-        sender.isEnabled = false
-        
-        let gameRef = self.db.collection("games").document(gameCode)
-        let group = DispatchGroup()
-        
-        group.enter()
-        gameRef.collection("submissions").getDocuments { snap, _ in
-            for doc in snap?.documents ?? [] {
-                doc.reference.delete()
-            }
-            group.leave()
-        }
-        
-        group.enter()
-        gameRef.collection("votes").getDocuments { snap, _ in
-            for doc in snap?.documents ?? [] {
-                doc.reference.delete()
-            }
-            group.leave()
-        }
-        
-        group.notify(queue: .main) {
-            let selectedPrompt = GameState.getNextPrompt()
-            gameRef.setData([
-                "gameState": "inProgress",
-                "currentPrompt": selectedPrompt,
-                "updatedAt": Timestamp()
-            ], merge: true) { _ in
-                DispatchQueue.main.async {
-                    sender.isEnabled = true
+
+        stateListener = db.collection("games")
+            .document(gameCode)
+            .addSnapshotListener { snapshot, error in
+
+                guard let data = snapshot?.data(),
+                      let state = data["gameState"] as? String else { return }
+
+                if state == "inProgress" && !self.hasRoutedToPrompt {
+                    self.hasRoutedToPrompt = true
+                    self.routeBackToPromptScreen()
                 }
             }
+    }
+
+    @IBAction func startNewRoundPressed(_ sender: UIButton) {
+
+        guard let gameCode = gameCode else { return }
+
+        sender.isEnabled = false
+
+        let gameRef = db.collection("games").document(gameCode)
+        let group = DispatchGroup()
+
+        group.enter()
+        gameRef.collection("submissions").getDocuments { snap, _ in
+            snap?.documents.forEach { $0.reference.delete() }
+            group.leave()
+        }
+
+        group.enter()
+        gameRef.collection("votes").getDocuments { snap, _ in
+            snap?.documents.forEach { $0.reference.delete() }
+            group.leave()
+        }
+        gameRef.collection("players").getDocuments { snap, _ in
+            for doc in snap?.documents ?? [] {
+                doc.reference.updateData([
+                    "didFinishVoting": false
+                ])
+            }
+        }
+        group.notify(queue: .main) {
+
+            let prompt = GameState.getNextPrompt()
+
+            gameRef.setData([
+                "gameState": "inProgress",
+                "currentPrompt": prompt,
+                "updatedAt": Timestamp()
+            ], merge: true)
+
+            sender.isEnabled = true
         }
     }
-    
+
     func routeBackToPromptScreen() {
-        if let viewControllers = self.navigationController?.viewControllers {
-            for vc in viewControllers {
+
+        if let vcs = navigationController?.viewControllers {
+            for vc in vcs {
                 if vc is CALViewController {
-                    self.navigationController?.popToViewController(vc, animated: true)
+                    navigationController?.popToViewController(vc, animated: true)
                     return
                 }
             }
-        }
-        
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        if let promptVC = storyboard.instantiateViewController(withIdentifier: "CALViewController") as? CALViewController {
-            promptVC.gameCode = self.gameCode
-            self.navigationController?.pushViewController(promptVC, animated: true)
         }
     }
 }
