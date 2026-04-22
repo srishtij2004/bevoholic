@@ -42,7 +42,8 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         navigationItem.hidesBackButton = true
         setUploadIconSize()
         addDashedBorder()
-        
+        uploadButton.layer.cornerRadius = 20
+        uploadButton.clipsToBounds = true
         loadPlayerDifficulty()
 
         completeButton.isEnabled = false
@@ -199,19 +200,17 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     }
 
     func addDashedBorder() {
-        uploadButton.layer.sublayers?.removeAll(where: { $0.name == "uploadDashedBorder" })
+        uploadButton.layer.sublayers?.removeAll(where: { $0 is CAShapeLayer })
 
             let dashedBorder = CAShapeLayer()
-            dashedBorder.name = "uploadDashedBorder"
             dashedBorder.strokeColor = UIColor.black.cgColor
             dashedBorder.lineDashPattern = [6, 4]
-            dashedBorder.fillColor = UIColor.clear.cgColor
-            dashedBorder.lineWidth = 2
+            dashedBorder.fillColor = nil
             dashedBorder.frame = uploadButton.bounds
 
             dashedBorder.path = UIBezierPath(
-                roundedRect: uploadButton.bounds.insetBy(dx: 2, dy: 2),
-                cornerRadius: uploadButton.layer.cornerRadius
+                roundedRect: uploadButton.bounds,
+                cornerRadius: 20
             ).cgPath
 
             uploadButton.layer.addSublayer(dashedBorder)
@@ -405,4 +404,5 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         leaderboardViewController.navigationItem.hidesBackButton = true
         navigationController?.pushViewController(leaderboardViewController, animated: true)
     }
+    
 }
