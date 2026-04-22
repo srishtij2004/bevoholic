@@ -21,8 +21,9 @@ class ImposterLobbyViewController: HeaderViewController, UITableViewDelegate, UI
 
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = 60
-
+        tableView.rowHeight = 80
+        tableView.layer.cornerRadius = 20
+        tableView.clipsToBounds = true
         gameCodeLabel.text = "Code: \(gameCode ?? "")"
 
         observePlayers()

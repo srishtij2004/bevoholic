@@ -22,7 +22,9 @@ class CALLobbyVC: HeaderViewController, UITableViewDelegate, UITableViewDataSour
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = 60
+        tableView.rowHeight = 80
+        tableView.layer.cornerRadius = 20
+        tableView.clipsToBounds = true
         gameLabel.text = "Cards Against Longhorns"
         gameCodeLabel.text = "Code: \(gameCode ?? "")"
         fetchPlayers()

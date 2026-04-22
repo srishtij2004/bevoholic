@@ -33,9 +33,11 @@ class LobbyViewController: HeaderViewController, UITableViewDelegate, UITableVie
         tableView.delegate = self
         tableView.dataSource = self
         gameCodeLabel.text = "Code: \(gameCode ?? "")"
-        tableView.rowHeight = 60
+        tableView.rowHeight = 80
         fetchPlayers()
         observeGameState()
+        tableView.layer.cornerRadius = 20
+        tableView.clipsToBounds = true
     }
 
 

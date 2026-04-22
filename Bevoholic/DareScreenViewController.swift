@@ -25,6 +25,9 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     @IBOutlet weak var skipButton: UIButton!
 
     @IBOutlet weak var avatarImageView: PlayerProfile!
+    
+    @IBOutlet weak var cardView: UIView!
+    
     var gameCode: String!
 
     private let db = Firestore.firestore()
@@ -46,6 +49,8 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         completeButton.alpha = 0.5
         completeButton.backgroundColor = .systemGreen
         completeButton.layer.cornerRadius = 25
+        cardView.layer.cornerRadius = 20
+        cardView.clipsToBounds = true
     }
 
     override func viewWillAppear(_ animated: Bool) {

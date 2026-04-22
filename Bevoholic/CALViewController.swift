@@ -11,6 +11,8 @@ class CALViewController: HeaderViewController, PHPickerViewControllerDelegate {
     @IBOutlet weak var calPromptLabel: UILabel!
     @IBOutlet weak var uploadButton: UIButton!
     
+    @IBOutlet weak var cardView: UIView!
+    
     var gameCode: String!
     var selectedImage: UIImage?
     private let db = Firestore.firestore()
@@ -19,6 +21,8 @@ class CALViewController: HeaderViewController, PHPickerViewControllerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.hidesBackButton = true
+        cardView.layer.cornerRadius = 20
+        cardView.clipsToBounds = true
         fetchSyncedPrompt()
         setUploadIconSize()
         addDashedBorder()
@@ -90,6 +94,7 @@ class CALViewController: HeaderViewController, PHPickerViewControllerDelegate {
                 }
                 self.selectedImage = self.resizeImage(selected, targetSize: CGSize(width: 400, height: 400))
                 self.updateUploadButtonPreview()
+                self.uploadButton.isEnabled = true
             }
         }
     }

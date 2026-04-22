@@ -25,7 +25,6 @@ struct GameState {
     
     static var unusedPrompts: [String] = allPrompts
     
-    // grabs a prompt and removes it from the unused list
     static func getNextPrompt() -> String {
         if unusedPrompts.isEmpty {
             unusedPrompts = allPrompts
