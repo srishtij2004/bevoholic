@@ -1,6 +1,7 @@
 import UIKit
 import FirebaseAuth
 import FirebaseFirestore
+import UserNotifications
 
 class ImposterGameViewController: HeaderViewController, UITableViewDataSource, UITableViewDelegate {
 
@@ -22,6 +23,13 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
     private var gameData: [String: Any] = [:]
     private var selectedVotePlayerId: String?
     private var lastKnownPhase: String?
+    private var lifecycleObserverTokens: [NSObjectProtocol] = []
+    private var backgroundMonitoringTask: UIBackgroundTaskIdentifier = .invalid
+
+    private var turnReminderNotificationIdentifier: String {
+        let code = gameCode ?? "unknown"
+        return "imposter-turn-reminder-\(code)"
+    }
 
     private var currentUserId: String? {
         Auth.auth().currentUser?.uid
@@ -49,6 +57,8 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
         playersTableView.dataSource = self
         playersTableView.delegate = self
         playersTableView.isHidden = true
+        playersTableView.alpha = 1.0
+        playersTableView.backgroundColor = .clear
 
         navigationItem.hidesBackButton = true
         title = ""
@@ -63,12 +73,23 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
         wordLabel.text = ""
         statusLabel.text = "Please wait"
 
+        requestNotificationPermissionIfNeeded()
         observePlayers()
         observeGame()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        startObservingAppLifecycle()
+        cancelTurnReminderNotification()
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        stopObservingAppLifecycle()
+        endBackgroundTurnMonitoringWindow()
+        cancelTurnReminderNotification()
+
         gameListener?.remove()
         gameListener = nil
         playersListener?.remove()
@@ -154,6 +175,7 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
             playersTableView.isHidden = true
             doneButton.isEnabled = false
         }
+        reconcileTurnReminderSchedulingForCurrentAppState()
     }
 
     func renderCluePhase(for userId: String) {
@@ -165,6 +187,13 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
 
         let readyIds = Set(gameData["clueReadyPlayerIds"] as? [String] ?? [])
         let hasMarkedReady = readyIds.contains(userId)
+        let speakerOrder = gameData["speakerOrder"] as? [String] ?? activePlayerIds
+        let currentSpeakerId = nextUnreadyPlayerId(
+            activeIds: activePlayerIds,
+            speakerOrder: speakerOrder,
+            readyIds: readyIds
+        )
+        let isCurrentSpeakersTurn = currentSpeakerId == userId
         let everyoneReady = !activePlayerIds.isEmpty && activePlayerIds.allSatisfy { readyIds.contains($0) }
 
         categoryLabel.text = "Category: \(category)"
@@ -178,15 +207,19 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
         if everyoneReady {
             statusLabel.text = "Moving to voting..."
         } else if hasMarkedReady {
-            statusLabel.text = "Waiting for everyone to be ready..."
+            statusLabel.text = "Clue submitted. Waiting for everyone else..."
+        } else if isCurrentSpeakersTurn {
+            statusLabel.text = "It's your turn. Give a clue, then tap I'm Ready."
+        } else if let currentSpeakerId = currentSpeakerId {
+            statusLabel.text = "Waiting for \(name(for: currentSpeakerId)) to give a clue..."
         } else {
             statusLabel.text = "Describe it without saying it!"
         }
 
         playersTableView.isHidden = true
         doneButton.isHidden = false
-        doneButton.setTitle(hasMarkedReady ? "Waiting..." : "I'm Ready", for: .normal)
-        doneButton.isEnabled = !hasMarkedReady
+        doneButton.setTitle((hasMarkedReady || !isCurrentSpeakersTurn) ? "Waiting..." : "I'm Ready", for: .normal)
+        doneButton.isEnabled = !hasMarkedReady && isCurrentSpeakersTurn
     }
 
     func renderVotingPhase(for userId: String) {
@@ -205,7 +238,7 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
         statusLabel.font = UIFont.systemFont(ofSize: 17)
         statusLabel.textAlignment = .center
         statusLabel.numberOfLines = 0
-        statusLabel.text = hasVoted ? "Vote submitted. Waiting for everyone else..." : "Tap a name to vote"
+        statusLabel.text = hasVoted ? "Vote submitted. Waiting for everyone else..." : "It's your turn to vote"
 
         playersTableView.isHidden = false
         playersTableView.reloadData()
@@ -278,6 +311,166 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
         return mappedVotes
     }
 
+    func nextUnreadyPlayerId(activeIds: [String], speakerOrder: [String], readyIds: Set<String>) -> String? {
+        let activeSet = Set(activeIds)
+        let orderedActiveIds = speakerOrder.filter { activeSet.contains($0) }
+        let turnOrder = orderedActiveIds.isEmpty ? activeIds : orderedActiveIds
+        return turnOrder.first(where: { !readyIds.contains($0) })
+    }
+
+    func shouldScheduleTurnReminder() -> Bool {
+        guard let currentUserId = currentUserId else { return false }
+
+        switch currentPhase {
+        case "clue":
+            let readyIds = Set(gameData["clueReadyPlayerIds"] as? [String] ?? [])
+            if readyIds.contains(currentUserId) {
+                return false
+            }
+
+            let speakerOrder = gameData["speakerOrder"] as? [String] ?? activePlayerIds
+            let computedCurrentSpeakerId = nextUnreadyPlayerId(
+                activeIds: activePlayerIds,
+                speakerOrder: speakerOrder,
+                readyIds: readyIds
+            )
+            let currentSpeakerId = (gameData["currentPlayerId"] as? String) ?? computedCurrentSpeakerId
+            return currentSpeakerId == currentUserId
+        case "voting":
+            let votes = parseVoteMap(gameData["imposterVotes"])
+            return votes[currentUserId] == nil
+        default:
+            return false
+        }
+    }
+
+    func requestNotificationPermissionIfNeeded() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, error in
+            if let error = error {
+                print("Error requesting notification permission: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func startObservingAppLifecycle() {
+        guard lifecycleObserverTokens.isEmpty else { return }
+
+        let notificationCenter = NotificationCenter.default
+        let willResignActiveToken = notificationCenter.addObserver(
+            forName: UIApplication.willResignActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.beginBackgroundTurnMonitoringWindow()
+            self?.reconcileTurnReminderSchedulingForCurrentAppState()
+        }
+
+        let didEnterBackgroundToken = notificationCenter.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.beginBackgroundTurnMonitoringWindow()
+            self?.reconcileTurnReminderSchedulingForCurrentAppState()
+        }
+
+        let didBecomeActiveToken = notificationCenter.addObserver(
+            forName: UIApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.endBackgroundTurnMonitoringWindow()
+            self?.reconcileTurnReminderSchedulingForCurrentAppState()
+        }
+
+        let willEnterForegroundToken = notificationCenter.addObserver(
+            forName: UIApplication.willEnterForegroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.endBackgroundTurnMonitoringWindow()
+            self?.reconcileTurnReminderSchedulingForCurrentAppState()
+        }
+
+        lifecycleObserverTokens = [
+            willResignActiveToken,
+            didEnterBackgroundToken,
+            didBecomeActiveToken,
+            willEnterForegroundToken
+        ]
+    }
+
+    func stopObservingAppLifecycle() {
+        let notificationCenter = NotificationCenter.default
+        lifecycleObserverTokens.forEach { notificationCenter.removeObserver($0) }
+        lifecycleObserverTokens.removeAll()
+    }
+
+    func reconcileTurnReminderSchedulingForCurrentAppState() {
+        let applicationState = UIApplication.shared.applicationState
+        if applicationState == .active {
+            cancelTurnReminderNotification()
+            return
+        }
+
+        if shouldScheduleTurnReminder() {
+            scheduleTurnReminderNotificationIfNeeded()
+        } else {
+            cancelTurnReminderNotification()
+        }
+    }
+
+    func beginBackgroundTurnMonitoringWindow() {
+        guard backgroundMonitoringTask == .invalid else { return }
+
+        backgroundMonitoringTask = UIApplication.shared.beginBackgroundTask(withName: "ImposterTurnMonitoring") { [weak self] in
+            self?.endBackgroundTurnMonitoringWindow()
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 25) { [weak self] in
+            self?.endBackgroundTurnMonitoringWindow()
+        }
+    }
+
+    func endBackgroundTurnMonitoringWindow() {
+        guard backgroundMonitoringTask != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(backgroundMonitoringTask)
+        backgroundMonitoringTask = .invalid
+    }
+
+    func scheduleTurnReminderNotificationIfNeeded() {
+        guard shouldScheduleTurnReminder() else {
+            cancelTurnReminderNotification()
+            return
+        }
+
+        let content = UNMutableNotificationContent()
+        content.title = "It's your turn in Imposter"
+        content.body = "Jump back into Bevoholic so your group can keep the round moving."
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: turnReminderNotificationIdentifier,
+            content: content,
+            trigger: trigger
+        )
+
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [turnReminderNotificationIdentifier])
+        center.add(request) { error in
+            if let error = error {
+                print("Error scheduling imposter turn reminder notification: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func cancelTurnReminderNotification() {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [turnReminderNotificationIdentifier])
+        center.removeDeliveredNotifications(withIdentifiers: [turnReminderNotificationIdentifier])
+    }
+
     func setupNextRound() {
         guard
             let gameCode = gameCode,
@@ -291,6 +484,7 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
         guard !activeIds.isEmpty else { return }
 
         let nextImposterId = activeIds.randomElement() ?? activeIds[0]
+        let speakerOrder = activeIds.shuffled()
         let randomContent = ImposterGameManager.shared.randomCategoryAndWord()
         let nextRoundNumber = (gameData["roundNumber"] as? Int ?? 1) + 1
 
@@ -303,6 +497,8 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
             "imposterVotes": [String: String](),
             "roundTopSuspectIds": [String](),
             "roundVoteCounts": [String: Int](),
+            "speakerOrder": speakerOrder,
+            "currentPlayerId": speakerOrder.first ?? activeIds[0],
             "roundNumber": nextRoundNumber,
             "updatedAt": Timestamp()
         ], merge: true)
@@ -328,7 +524,18 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
             guard phase == "clue" else { return nil }
 
             let activeIds = data["activePlayerIds"] as? [String] ?? []
-            var readyIds = Set(data["clueReadyPlayerIds"] as? [String] ?? [])
+            let speakerOrder = data["speakerOrder"] as? [String] ?? activeIds
+            let readyIdsBeforeUpdate = Set(data["clueReadyPlayerIds"] as? [String] ?? [])
+            let expectedCurrentSpeakerId = self.nextUnreadyPlayerId(
+                activeIds: activeIds,
+                speakerOrder: speakerOrder,
+                readyIds: readyIdsBeforeUpdate
+            )
+
+            // Only the active speaker can complete the clue step.
+            guard expectedCurrentSpeakerId == currentUserId else { return nil }
+
+            var readyIds = readyIdsBeforeUpdate
             readyIds.insert(currentUserId)
 
             var updates: [String: Any] = [
@@ -342,6 +549,16 @@ class ImposterGameViewController: HeaderViewController, UITableViewDataSource, U
                 updates["imposterVotes"] = [String: String]()
                 updates["roundTopSuspectIds"] = [String]()
                 updates["roundVoteCounts"] = [String: Int]()
+                updates["currentPlayerId"] = FieldValue.delete()
+            } else {
+                let nextSpeakerId = self.nextUnreadyPlayerId(
+                    activeIds: activeIds,
+                    speakerOrder: speakerOrder,
+                    readyIds: readyIds
+                )
+                if let nextSpeakerId = nextSpeakerId {
+                    updates["currentPlayerId"] = nextSpeakerId
+                }
             }
 
             transaction.setData(updates, forDocument: gameRef, merge: true)
