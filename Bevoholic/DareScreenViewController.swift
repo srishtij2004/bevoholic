@@ -7,6 +7,7 @@
 
 import UIKit
 import PhotosUI
+import MapKit
 import FirebaseAuth
 import FirebaseFirestore
 
@@ -34,6 +35,7 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
     private var gameListener: ListenerRegistration?
     private var playerListener: ListenerRegistration?
     private var hasRoutedAway = false
+    private var currentMapDestination: MapDestination?
     
     var playerDifficulty = "Buzzed Bevo"
     
@@ -52,6 +54,7 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
         completeButton.layer.cornerRadius = 25
         cardView.layer.cornerRadius = 20
         cardView.clipsToBounds = true
+        configureLocationButton()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -172,7 +175,21 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
 
         dare.text = gameData["currentDare"] as? String ?? ""
 
-        locationButton.isHidden = location == "Kickback"
+        currentMapDestination = DrinkOrDareGameManager.shared.mapDestination(
+            for: dare.text ?? "",
+            location: location
+        )
+        locationButton.isHidden = currentMapDestination == nil
+        locationButton.isEnabled = currentMapDestination != nil
+    }
+
+    func configureLocationButton() {
+        var config = locationButton.configuration
+        config?.title = "Open in Apple Maps"
+        config?.image = UIImage(systemName: "map.fill")
+        config?.imagePlacement = .leading
+        config?.imagePadding = 8
+        locationButton.configuration = config
     }
 
     func routeIfNeeded(using gameData: [String: Any]) {
@@ -281,6 +298,23 @@ class DareScreenViewController: HeaderViewController, PHPickerViewControllerDele
 
     @IBAction func skipPressed(_ sender: UIButton) {
         submitTurn(pointsDelta: -5)
+    }
+
+    @IBAction func locationPressed(_ sender: UIButton) {
+        guard let destination = currentMapDestination else {
+            return
+        }
+
+        let coordinate = CLLocationCoordinate2D(
+            latitude: destination.latitude,
+            longitude: destination.longitude
+        )
+        let placemark = MKPlacemark(coordinate: coordinate)
+        let mapItem = MKMapItem(placemark: placemark)
+        mapItem.name = destination.name
+        mapItem.openInMaps(launchOptions: [
+            MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
+        ])
     }
 
     func submitTurn(pointsDelta: Int) {
