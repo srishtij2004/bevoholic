@@ -377,14 +377,11 @@ class HomeViewController: HeaderViewController {
             textField.font = UIFont.boldSystemFont(ofSize: 20)
             textField.textAlignment = .center
             
-            // Prevent keyboard from appearing
             textField.tintColor = .clear
             textField.inputView = UIView()
             
-            // Disable copy/paste menu
             textField.addTarget(self, action: #selector(self.disableEditing(_:)), for: .editingDidBegin)
 
-            // Clipboard button
             let copyButton = UIButton(type: .system)
             copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
             copyButton.tintColor = .systemBlue
