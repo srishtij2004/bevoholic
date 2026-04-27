@@ -4,7 +4,7 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class HomeViewController: HeaderViewController {
-
+    
     @IBOutlet weak var calButton: UIButton!
     let db = Firestore.firestore()
     
@@ -12,7 +12,7 @@ class HomeViewController: HeaderViewController {
         super.viewDidLoad()
         calButton.titleLabel?.textAlignment = .center
     }
-
+    
     @IBAction func profileTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SettingsViewController")
@@ -28,11 +28,11 @@ class HomeViewController: HeaderViewController {
     @IBAction func drinkOrDareTapped(_ sender: UIButton) {
         showOptions(for: "Drink or Dare")
     }
-
+    
     @IBAction func imposterTapped(_ sender: UIButton) {
         showOptions(for: "Imposter")
     }
-
+    
     @IBAction func cardsAgainstLonghornsTapped(_ sender: UIButton) {
         showOptions(for: "Cards Against Longhorns")
     }
@@ -43,11 +43,11 @@ class HomeViewController: HeaderViewController {
             message: "Do you want to join or create a game?",
             preferredStyle: .actionSheet
         )
-
+        
         actionSheet.addAction(UIAlertAction(title: "Join Game", style: .default) { _ in
             self.showJoinAlert(for: gameType)
         })
-
+        
         actionSheet.addAction(UIAlertAction(title: "Create Game", style: .default) { _ in
             if gameType == "Drink or Dare" {
                 self.showCreateGameOptions()
@@ -55,7 +55,7 @@ class HomeViewController: HeaderViewController {
                 self.createGenericGame(type: gameType)
             }
         })
-
+        
         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(actionSheet, animated: true)
     }
@@ -82,7 +82,7 @@ class HomeViewController: HeaderViewController {
                 self.showJoinGameError(message: "Game not found.")
                 return
             }
-
+            
             if actualType == expectedType {
                 self.addCurrentUserToGame(gameCode: code, userId: userId, isHost: false) { success in
                     if success { self.routeToCorrectLobby(type: actualType, code: code) }
@@ -92,7 +92,7 @@ class HomeViewController: HeaderViewController {
             }
         }
     }
-
+    
     func routeToCorrectLobby(type: String, code: String) {
         switch type {
         case "Drink or Dare": goToLobby(with: code)
@@ -105,18 +105,17 @@ class HomeViewController: HeaderViewController {
     func createGenericGame(type: String) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         let code = generateGameCode()
-
-        // Matches your existing Imposter gameData exactly
+        
         let gameData: [String: Any] = [
             "hostId": userId,
             "gameType": type,
             "gameState": "lobby",
             "createdAt": Timestamp()
         ]
-
+        
         db.collection("games").document(code).setData(gameData) { error in
             if let error = error { print(error); return }
-
+            
             self.addCurrentUserToGame(gameCode: code, userId: userId, isHost: true) { success in
                 guard success else { return }
                 
@@ -129,17 +128,84 @@ class HomeViewController: HeaderViewController {
             }
         }
     }
+    
+    func showCopiedConfirmation() {
+        let copiedAlert = UIAlertController(
+            title: "Copied!",
+            message: "Game code copied to clipboard.",
+            preferredStyle: .alert
+        )
+        
+        present(copiedAlert, animated: true)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            copiedAlert.dismiss(animated: true)
+        }
+    }
+    
+    func shareGameCode(_ code: String) {
+        let message = "Join my game! 🎉\n\nGame Code: \(code)"
+        
+        let activityVC = UIActivityViewController(
+            activityItems: [message],
+            applicationActivities: nil
+        )
+        
+        if let popover = activityVC.popoverPresentationController {
+            popover.sourceView = self.view
+            popover.sourceRect = CGRect(x: self.view.bounds.midX,
+                                        y: self.view.bounds.midY,
+                                        width: 0,
+                                        height: 0)
+            popover.permittedArrowDirections = []
+        }
+        
+        present(activityVC, animated: true)
+    }
+    
     func showCALCodeAlert(code: String) {
         let alert = UIAlertController(
-            title: "Cards against Longhorns Game Created",
+            title: "Cards Against Longhorns Game Created",
             message: "Share this code:\n\(code)",
             preferredStyle: .alert
         )
-
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+        
+        alert.addTextField { textField in
+            textField.text = code
+            textField.font = UIFont.boldSystemFont(ofSize: 20)
+            textField.textAlignment = .center
+            
+            textField.isEnabled = false
+            
+            let copyButton = UIButton(type: .system)
+            copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
+            copyButton.tintColor = .systemBlue
+            copyButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+            
+            copyButton.addAction(UIAction { _ in
+                UIPasteboard.general.string = code
+                
+                copyButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
+                }
+            }, for: .touchUpInside)
+            
+            textField.rightView = copyButton
+            textField.rightViewMode = .always
+        }
+        
+        alert.addAction(UIAlertAction(title: "Share Code", style: .default) { _ in
+            self.shareGameCode(code)
+        })
+        
+        alert.addAction(UIAlertAction(title: "Enter Lobby", style: .default) { _ in
             self.goToCALLobby(with: code)
         })
-
+        
         present(alert, animated: true)
     }
     
@@ -149,19 +215,19 @@ class HomeViewController: HeaderViewController {
             message: "Do you want to join or create a game?",
             preferredStyle: .actionSheet
         )
-
+        
         actionSheet.addAction(UIAlertAction(title: "Join Game", style: .default) { _ in
             self.showJoinGameAlert()
         })
-
+        
         actionSheet.addAction(UIAlertAction(title: "Create Game", style: .default) { _ in
             self.showCreateGameOptions()
         })
-
+        
         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(actionSheet, animated: true)
     }
-
+    
     func showJoinGameAlert() {
         let alert = UIAlertController(title: "Join Game", message: "Enter Game Code", preferredStyle: .alert)
         alert.addTextField { $0.placeholder = "Game Code" }
@@ -175,7 +241,7 @@ class HomeViewController: HeaderViewController {
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(alert, animated: true)
     }
-
+    
     func showCreateGameOptions() {
         let sheet = UIAlertController(title: "Select Location", message: nil, preferredStyle: .actionSheet)
         let locations = ["On Campus", "West Campus", "Kickback"]
@@ -187,12 +253,12 @@ class HomeViewController: HeaderViewController {
         sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(sheet, animated: true)
     }
-
+    
     func generateGameCode() -> String {
         let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         return String((0..<6).compactMap { _ in chars.randomElement() })
     }
-
+    
     func createGame(location: String) {
         
         // Set dare mode in the game manager
@@ -209,18 +275,18 @@ class HomeViewController: HeaderViewController {
         
         guard let userId = Auth.auth().currentUser?.uid else { return }
         let code = generateGameCode()
-
+        
         let gameData: [String: Any] = [
             "hostId": userId,
             "location": location,
             "gameType": "Drink or Dare",
             "createdAt": Timestamp()
         ]
-
+        
         // Store game
         db.collection("games").document(code).setData(gameData) { error in
             if let error = error { print(error); return }
-
+            
             // Add host as player
             self.addCurrentUserToGame(gameCode: code, userId: userId, isHost: true) { success in
                 guard success else { return }
@@ -231,33 +297,33 @@ class HomeViewController: HeaderViewController {
     
     func joinGame(gameCode: String) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
-
+        
         let gameDocument = db.collection("games").document(gameCode)
-
+        
         gameDocument.getDocument { snapshot, error in
             if let error = error {
                 print("Error looking up game: \(error)")
                 self.showJoinGameError(message: "We couldn't verify that game code. Please try again.")
                 return
             }
-
+            
             guard let snapshot = snapshot, snapshot.exists else {
                 self.showJoinGameError(message: "That game lobby doesn't exist. Check the code and try again.")
                 return
             }
-
+            
             self.addCurrentUserToGame(gameCode: gameCode, userId: userId, isHost: false) { success in
                 guard success else {
                     self.showJoinGameError(message: "Unable to join this game right now. Please try again.")
                     return
                 }
-
+                
                 print("Joined game \(gameCode)")
                 self.goToLobby(with: gameCode)
             }
         }
     }
-
+    
     func addCurrentUserToGame(gameCode: String, userId: String, isHost: Bool, completion: @escaping (Bool) -> Void) {
         db.collection("users").document(userId).getDocument { snapshot, error in
             if let error = error {
@@ -265,11 +331,11 @@ class HomeViewController: HeaderViewController {
                 completion(false)
                 return
             }
-
+            
             let username = (snapshot?.data()?["username"] as? String)?
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             let playerName = (username?.isEmpty == false) ? username! : "Player"
-
+            
             self.db.collection("games").document(gameCode)
                 .collection("players").document(userId)
                 .setData([
@@ -283,33 +349,73 @@ class HomeViewController: HeaderViewController {
                         completion(false)
                         return
                     }
-
+                    
                     completion(true)
                 }
         }
     }
-
+    
     func showJoinGameError(message: String) {
         let alert = UIAlertController(title: "Unable to Join Game", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
-
+    
+    @objc func disableEditing(_ textField: UITextField) {
+        textField.resignFirstResponder()
+    }
+    
     func showGameCodeAlert(code: String, location: String) {
         let alert = UIAlertController(
             title: "Game Created",
-            message: "Location: \(location)\n\nShare this code:\n\(code)",
+            message: "Location: \(location)",
             preferredStyle: .alert
         )
+        
+        alert.addTextField { textField in
+            textField.text = code
+            textField.font = UIFont.boldSystemFont(ofSize: 20)
+            textField.textAlignment = .center
+            
+            // Prevent keyboard from appearing
+            textField.tintColor = .clear
+            textField.inputView = UIView()
+            
+            // Disable copy/paste menu
+            textField.addTarget(self, action: #selector(self.disableEditing(_:)), for: .editingDidBegin)
 
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
-            // Navigate to lobby AFTER the user taps OK
+            // Clipboard button
+            let copyButton = UIButton(type: .system)
+            copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
+            copyButton.tintColor = .systemBlue
+            copyButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+
+            copyButton.addAction(UIAction { _ in
+                UIPasteboard.general.string = code
+                
+                copyButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
+                }
+            }, for: .touchUpInside)
+
+            textField.rightView = copyButton
+            textField.rightViewMode = .always
+        }
+        
+        alert.addAction(UIAlertAction(title: "Share", style: .default) { _ in
+            self.shareGameCode(code)
+        })
+        
+        alert.addAction(UIAlertAction(title: "Enter Lobby", style: .default) { _ in
             self.goToLobby(with: code)
         })
-
+        
         present(alert, animated: true)
     }
-
+    
     func goToLobby(with gameCode: String) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let lobbyVC = storyboard.instantiateViewController(withIdentifier: "LobbyViewController") as? LobbyViewController {
@@ -327,26 +433,26 @@ class HomeViewController: HeaderViewController {
         lobbyVC.gameCode = gameCode
         navigationController?.pushViewController(lobbyVC, animated: true)
     }
-
+    
     func showImposterOptions() {
         let actionSheet = UIAlertController(
             title: "Imposter",
             message: "Do you want to join or create a game?",
             preferredStyle: .actionSheet
         )
-
+        
         actionSheet.addAction(UIAlertAction(title: "Join Game", style: .default) { _ in
             self.showJoinImposterAlert()
         })
-
+        
         actionSheet.addAction(UIAlertAction(title: "Create Game", style: .default) { _ in
             self.createImposterGame()
         })
-
+        
         actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(actionSheet, animated: true)
     }
-
+    
     func showJoinImposterAlert() {
         let alert = UIAlertController(title: "Join Imposter Game", message: "Enter Game Code", preferredStyle: .alert)
         alert.addTextField { $0.placeholder = "Game Code" }
@@ -364,53 +470,53 @@ class HomeViewController: HeaderViewController {
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(alert, animated: true)
     }
-
+    
     func createImposterGame() {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         let code = generateGameCode()
-
+        
         let gameData: [String: Any] = [
             "hostId": userId,
             "gameType": "Imposter",
             "gameState": "lobby",
             "createdAt": Timestamp()
         ]
-
+        
         db.collection("games").document(code).setData(gameData) { error in
             if let error = error {
                 print("Error creating imposter game: \(error.localizedDescription)")
                 return
             }
-
+            
             self.addCurrentUserToGame(gameCode: code, userId: userId, isHost: true) { success in
                 guard success else { return }
                 self.showImposterCodeAlert(code: code)
             }
         }
     }
-
+    
     func joinImposterGame(gameCode: String) {
         guard let userId = Auth.auth().currentUser?.uid else { return }
         let gameDocument = db.collection("games").document(gameCode)
-
+        
         gameDocument.getDocument { snapshot, error in
             if let error = error {
                 print("Error looking up imposter game: \(error)")
                 self.showJoinGameError(message: "We couldn't verify that game code. Please try again.")
                 return
             }
-
+            
             guard let snapshot = snapshot, snapshot.exists else {
                 self.showJoinGameError(message: "That game lobby doesn't exist. Check the code and try again.")
                 return
             }
-
+            
             let gameType = snapshot.data()?["gameType"] as? String ?? ""
             guard gameType == "Imposter" else {
                 self.showJoinGameError(message: "That code is not for an Imposter game.")
                 return
             }
-
+            
             self.addCurrentUserToGame(gameCode: gameCode, userId: userId, isHost: false) { success in
                 guard success else {
                     self.showJoinGameError(message: "Unable to join this game right now. Please try again.")
@@ -420,21 +526,53 @@ class HomeViewController: HeaderViewController {
             }
         }
     }
-
+    
     func showImposterCodeAlert(code: String) {
         let alert = UIAlertController(
             title: "Imposter Game Created",
             message: "Share this code:\n\(code)",
             preferredStyle: .alert
         )
-
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+        
+        alert.addTextField { textField in
+            textField.text = code
+            textField.font = UIFont.boldSystemFont(ofSize: 20)
+            textField.textAlignment = .center
+            
+            textField.isEnabled = false
+            
+            let copyButton = UIButton(type: .system)
+            copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
+            copyButton.tintColor = .systemBlue
+            copyButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+            
+            copyButton.addAction(UIAction { _ in
+                UIPasteboard.general.string = code
+                
+                copyButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
+                }
+            }, for: .touchUpInside)
+            
+            textField.rightView = copyButton
+            textField.rightViewMode = .always
+        }
+        
+        alert.addAction(UIAlertAction(title: "Share Code", style: .default) { _ in
+            self.shareGameCode(code)
+        })
+        
+        alert.addAction(UIAlertAction(title: "Enter Lobby", style: .default) { _ in
             self.goToImposterLobby(with: code)
         })
-
+        
         present(alert, animated: true)
     }
-
+    
     func goToImposterLobby(with gameCode: String) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         guard let lobbyVC = storyboard.instantiateViewController(withIdentifier: "ImposterLobbyViewController") as? ImposterLobbyViewController else {
