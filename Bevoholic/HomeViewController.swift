@@ -175,25 +175,27 @@ class HomeViewController: HeaderViewController {
             textField.font = UIFont.boldSystemFont(ofSize: 20)
             textField.textAlignment = .center
             
-            textField.isEnabled = false
+            textField.tintColor = .clear
+            textField.inputView = UIView()
             
+            textField.addTarget(self, action: #selector(self.disableEditing(_:)), for: .editingDidBegin)
+
             let copyButton = UIButton(type: .system)
             copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
             copyButton.tintColor = .systemBlue
             copyButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-            
+
             copyButton.addAction(UIAction { _ in
                 UIPasteboard.general.string = code
                 
                 copyButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-                
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                     copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
                 }
             }, for: .touchUpInside)
-            
+
             textField.rightView = copyButton
             textField.rightViewMode = .always
         }
@@ -536,25 +538,27 @@ class HomeViewController: HeaderViewController {
             textField.font = UIFont.boldSystemFont(ofSize: 20)
             textField.textAlignment = .center
             
-            textField.isEnabled = false
+            textField.tintColor = .clear
+            textField.inputView = UIView()
             
+            textField.addTarget(self, action: #selector(self.disableEditing(_:)), for: .editingDidBegin)
+
             let copyButton = UIButton(type: .system)
             copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
             copyButton.tintColor = .systemBlue
             copyButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-            
+
             copyButton.addAction(UIAction { _ in
                 UIPasteboard.general.string = code
                 
                 copyButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-                
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                     copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
                 }
             }, for: .touchUpInside)
-            
+
             textField.rightView = copyButton
             textField.rightViewMode = .always
         }
